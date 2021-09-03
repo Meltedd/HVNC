@@ -19,7 +19,7 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 ![Image1](https://i.ibb.co/JxMn3j4/image.png)
 
 # Contact Me:
-Discord: Melted#0001
+Discord: [Melted#0001](https://discord.com/users/820078435165798431)
 
 Telegram: [Melteddd](https://t.me/Melteddd)
 
