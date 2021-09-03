@@ -16,7 +16,7 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 - Compile the Server & Client, and run the Server. Now, when the Client is executed, it will open a new "Hidden Desktop" window. If you right-click on the white bar at the top of the "Hidden Desktop" window, you can view the available commands that you can run on the target machine.
 
 # Demo of HVNC Window:
-![Image1](https://i.ibb.co/JxMn3j4/image.png)
+[![Video]({https://i.ibb.co/JxMn3j4/image.png})]({https://vimeo.com/597459719} "HVNC Demo")
 
 # Contact Me:
 Discord: [Melted#0001](https://discord.com/users/820078435165798431)
