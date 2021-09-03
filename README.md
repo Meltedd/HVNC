@@ -20,5 +20,7 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 
 # Contact Me:
 Discord: Melted#0001
+
 Telegram: t.me/Melteddd
+
 XMPP: melted@xmpp.jp
