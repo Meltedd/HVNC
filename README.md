@@ -1,5 +1,5 @@
 # HVNC - Tinynuke (Fixed)
-This HVNC (Hidden Virtual Network Computing) is based off of Tinynuke's HVNC (C++).
+This HVNC (Hidden Virtual Network Computing) Client and Server is based off of Tinynuke's HVNC (C++).
 
 Credits to Tinynuke: https://github.com/rossja/TinyNuke
 
