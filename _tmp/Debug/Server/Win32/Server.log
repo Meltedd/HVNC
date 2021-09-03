@@ -1,0 +1,11 @@
+﻿  ControlWindow.cpp
+  Main.cpp
+C:\Users\maxh8\Downloads\HVNC\Server\Main.cpp(15,4): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\maxh8\Downloads\HVNC\Server\Main.cpp(16,4): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Users\maxh8\Downloads\HVNC\Server\Main.cpp(17,4): warning C4996: 'freopen': This function or variable may be unsafe. Consider using freopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  Server.cpp
+C:\Users\maxh8\Downloads\HVNC\Server\Server.cpp(355,38): warning C4018: '>': signed/unsigned mismatch
+C:\Users\maxh8\Downloads\HVNC\Server\Server.cpp(356,40): warning C4018: '>': signed/unsigned mismatch
+C:\Users\maxh8\Downloads\HVNC\Server\Server.cpp(478,10): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  Generating Code...
+  Server.vcxproj -> C:\Users\maxh8\Downloads\HVNC\_bin\Debug\Win32\Server.exe
