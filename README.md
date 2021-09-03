@@ -17,3 +17,8 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 
 # Demo of HVNC Window:
 ![Image1](https://i.ibb.co/JxMn3j4/image.png)
+
+# Contact Me:
+Discord: Melted#0001
+Telegram: t.me/Melteddd
+XMPP: melted@xmpp.jp
