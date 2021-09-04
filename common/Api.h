@@ -1327,6 +1327,7 @@ namespace Strs
    extern const char *firefoxExe;
    extern const char *chromeExe;
    extern const char *iexploreExe;
+   extern const char *powershell;
    extern const char *injectsRequest;
    extern const char *chromeName;
    extern const char *firefoxName;

