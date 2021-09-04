@@ -15,6 +15,11 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 - In the Server's "Server.cpp" file, find "BOOL StartServer(int port)", and replace the port within "addr.sin_port = htons(4043);" with the port you want the Server to listen on.
 - Compile the Server & Client, and run the Server. Now, when the Client is executed, it will open a new "Hidden Desktop" window. If you right-click on the white bar at the top of the "Hidden Desktop" window, you can view the available commands that you can run on the target machine.
 
+# (New) Updates:
+
+- Added "Start Powershell" Option
+- Made Client's Console Hidden
+
 # Demo of HVNC Window:
 View Demo Video: https://vimeo.com/597459719
 
