@@ -4,8 +4,9 @@ This HVNC (Hidden Virtual Network Computing) Client and Server is based off of T
 Credits to Tinynuke: https://github.com/rossja/TinyNuke
 
 # Features:
-- Hidden Desktop (resize in accurate proportions for the best results)
+- Start Explorer (Hidden Desktop)
 - Open "Run"
+- Start Powershell
 - Start Chrome
 - Start Firefox
 - Start Internet Explorer
