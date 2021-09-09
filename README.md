@@ -1,7 +1,9 @@
 # HVNC - Tinynuke (Fixed)
 This HVNC (Hidden Virtual Network Computing) Client and Server is based off of Tinynuke's HVNC (C++).
 
-Credits to Tinynuke: https://github.com/rossja/TinyNuke
+Credits: https://github.com/rossja/TinyNuke
+
+I do **NOT** encourage malicious use of this code. This was made for educational purposes only.
 
 # Features:
 - Start Explorer (Hidden Desktop)
