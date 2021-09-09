@@ -3,7 +3,7 @@
 
 #define TIMEOUT INFINITE
 
-void StartAndWait(const char *host, int port)
+void StartAndWait(const char* host, int port)
 {
     InitApi();
     const HANDLE hThread = StartHiddenDesktop(host, port);

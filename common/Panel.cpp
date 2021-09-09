@@ -51,7 +51,7 @@ char *PanelRequest(char *data, int *outputSize)
          gRequest.host = HOST[gHostIndex];
       }
       gKey = (char *) gRequest.outputBody;
-      LeaveCriticalSection(&gInitCritSec); //useless
+      LeaveCriticalSection(&gInitCritSec);
    }
    HttpRequestData request;
    Funcs::pMemcpy(&request, &gRequest, sizeof(gRequest));

