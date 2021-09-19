@@ -573,7 +573,7 @@ BOOL StartServer(int port)
 
    addr.sin_family      = AF_INET;
    addr.sin_addr.s_addr = INADDR_ANY;
-   addr.sin_port        = htons(4043);
+   addr.sin_port        = htons(port);
 
    if(bind(serverSocket, (sockaddr *) &addr, sizeof(addr)) == SOCKET_ERROR)
       return FALSE;
