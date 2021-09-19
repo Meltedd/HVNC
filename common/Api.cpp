@@ -383,7 +383,7 @@ namespace Strs
    const char *edgeExe;
    const char *braveExe;
    const char *iexploreExe;
-   const char* powershell;
+   const char *powershell;
    const char *injectsRequest;
    const char *chromeName;
    const char *firefoxName;
