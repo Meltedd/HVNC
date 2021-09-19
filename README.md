@@ -17,7 +17,8 @@ Credits: https://github.com/rossja/TinyNuke
 
 # Usage:
 - In the Client's "Main.cpp" file, edit the ip and port variables.
-- Compile the Server & Client, and run the Server. Enter the port to listen on in the Server's console when prompted.
+- Compile the Server & Client, and run the Server. 
+- Enter the port to listen on in the Server's console when prompted.
 - When the Client is executed, it will open a new "Hidden Desktop" window. If you right-click on the white bar at the top of the "Hidden Desktop" window, you can view the available commands that you can run on the target machine.
 
 # Updates (New):
