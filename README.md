@@ -17,8 +17,8 @@ Credits: https://github.com/rossja/TinyNuke
 
 # Usage:
 - In the Client's "Main.cpp" file, edit the ip and port variables.
-- In the Server's "Server.cpp" file, find "BOOL StartServer(int port)", and replace the port within "addr.sin_port = htons(4043);" with the port you want the Server to listen on.
-- Compile the Server & Client, and run the Server. Now, when the Client is executed, it will open a new "Hidden Desktop" window. If you right-click on the white bar at the top of the "Hidden Desktop" window, you can view the available commands that you can run on the target machine.
+- Compile the Server & Client, and run the Server. Enter the port to listen on in the Server's console when prompted.
+- When the Client is executed, it will open a new "Hidden Desktop" window. If you right-click on the white bar at the top of the "Hidden Desktop" window, you can view the available commands that you can run on the target machine.
 
 # Updates (New):
 
@@ -28,6 +28,7 @@ Credits: https://github.com/rossja/TinyNuke
 - Added "Start Edge" Option
 - Added "Start Brave" Option
 - Adjusted Window Size for "Start Powershell"
+- Added Prompt for Port to Listen On
 
 # Demo of HVNC Window:
 View Demo Video: https://vimeo.com/597459719
