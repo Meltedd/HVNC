@@ -31,7 +31,7 @@ struct Client
 };
 
 static const COLORREF gc_trans              = RGB(255, 174, 201);
-static const BYTE     gc_magik[]            = { 'A', 'V', 'E', '_', 'M', 'A', 'R', 'I', 'A', 0 };
+static const BYTE     gc_magik[]            = { 'M', 'E', 'L', 'T', 'E', 'D', 0 };
 static const DWORD    gc_maxClients         = 256;
 static const DWORD    gc_sleepNotRecvPixels = 33;
 
