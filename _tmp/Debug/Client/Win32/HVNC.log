@@ -1,9 +1,0 @@
-﻿  Api.cpp
-C:\Users\maxh8\Downloads\HVNC\common\Api.h(7,32): warning C4455: 'operator ""END_ENC_STR': literal suffix identifiers that do not start with an underscore are reserved
-  LINK : 0 new modules and 1 (out of 265) modules have changed since prior linking
-  Generating non-SAFESEH image.
-  Starting pass 2
-       Api.obj
-       LIBCMTD.lib(loadcfg.obj)
-  Finished pass 2
-  HVNC.vcxproj -> C:\Users\maxh8\Downloads\HVNC\_bin\Debug\Win32\Client.exe
