@@ -39,6 +39,6 @@ View Demo Video: https://vimeo.com/597459719
 # Contact Me:
 Discord: melted3294
 
-Telegram: [Melteddd](https://t.me/Melteddd)
+Instagram: @m.axx_h
 
 LinkedIn: [Max Harari](https://www.linkedin.com/in/max-harari-b35231359)
