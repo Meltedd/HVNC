@@ -37,8 +37,8 @@ View Demo Video: https://vimeo.com/597459719
 ![Image1](https://i.ibb.co/JxMn3j4/image.png)
 
 # Contact Me:
-Discord: [Melted#0001](https://discord.com/users/820078435165798431)
+Discord: melted3294
 
 Telegram: [Melteddd](https://t.me/Melteddd)
 
-XMPP: melted@xmpp.jp
+LinkedIn: [Max Harari](https://www.linkedin.com/in/max-harari-b35231359)
