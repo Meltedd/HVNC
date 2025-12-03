@@ -1,5 +1,5 @@
 # HVNC - Tinynuke (Fixed)
-This HVNC (Hidden Virtual Network Computing) Client and Server is based off of Tinynuke's HVNC (C++).
+This HVNC Client and Server is based off of the Tinynuke botnet's HVNC (C++).
 
 I do **NOT** encourage malicious use of this code. This was made for educational purposes only.
 
@@ -35,10 +35,3 @@ Credits: https://github.com/rossja/TinyNuke
 View Demo Video: https://vimeo.com/597459719
 
 ![Image1](https://i.ibb.co/JxMn3j4/image.png)
-
-# Contact Me:
-Discord: [Melted#0001](https://discord.com/users/820078435165798431)
-
-Telegram: [Melteddd](https://t.me/Melteddd)
-
-XMPP: melted@xmpp.jp
