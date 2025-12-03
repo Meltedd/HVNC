@@ -35,6 +35,3 @@ Credits: https://github.com/rossja/TinyNuke
 View Demo Video: https://vimeo.com/597459719
 
 ![Image1](https://i.ibb.co/JxMn3j4/image.png)
-
-# Contact Me:
-Discord: melted3294
