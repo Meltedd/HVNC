@@ -1,0 +1,8 @@
+# Build output
+_bin/
+_tmp/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
