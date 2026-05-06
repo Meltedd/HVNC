@@ -5,13 +5,13 @@ banking trojan's HVNC module. The client opens a hidden desktop on the
 operator side, with a title bar menu of commands to launch processes
 on the target machine.
 
-[Demo video](https://vimeo.com/597459719)
-
-![demo](demo.png)
-
 > [!WARNING]
 > This project is for research and educational purposes only. I do not
 > encourage or condone malicious use.
+
+[View demo video](https://vimeo.com/597459719)
+
+![demo](demo.png)
 
 ## Features
 
