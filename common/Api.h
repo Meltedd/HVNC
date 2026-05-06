@@ -66,7 +66,7 @@ namespace Types
       int     cbMultiByte,
       PCHAR   lpDefaultChar,
       LPBOOL  lpUsedDefaultChar
-   );   
+   );
    typedef HLOCAL (WINAPI *T_LocalAlloc)
    (
       UINT   uFlags,
@@ -80,7 +80,7 @@ namespace Types
    );
    typedef int (WINAPI *T_MultiByteToWideChar)
    (
-      UINT   CodePage,                           
+      UINT   CodePage,
       DWORD  dwFlags,
       LPCTSTR lpMultiByteStr,
       int    cbMultiByte,
@@ -88,12 +88,12 @@ namespace Types
       int    cchWideChar
    );
    typedef void *(__cdecl *T_malloc)
-   (  
-      size_t size   
+   (
+      size_t size
    );
    typedef void (__cdecl *T_free)
-   (   
-      void *memblock   
+   (
+      void *memblock
    );
    typedef LPVOID (WINAPI *T_VirtualAllocEx)
    (
@@ -145,10 +145,10 @@ namespace Types
       PCHAR pPath
    );
    typedef int (__cdecl *T_strncmp)
-   (  
-      const char *string1,  
-      const char *string2,  
-      size_t count   
+   (
+      const char *string1,
+      const char *string2,
+      size_t count
    );
    typedef int (WINAPI *T_lstrlen)
    (
@@ -219,10 +219,10 @@ namespace Types
       HLOCAL hMem
    );
    typedef void (__cdecl *T_memcpy)
-   (  
-      void *dest,  
-      const void *src,  
-      size_t count   
+   (
+      void *dest,
+      const void *src,
+      size_t count
    );
    typedef int (WINAPI *T_lstrcmp)
    (
@@ -235,15 +235,15 @@ namespace Types
       LPCTSTR  pszSrch
    );
    typedef long (_cdecl *T_strtol)
-   (  
-      const char *nptr,  
-      char      **endptr,  
-      int         base   
+   (
+      const char *nptr,
+      char      **endptr,
+      int         base
    );
    typedef void *(_cdecl *T_realloc)
-   (  
-      void *memblock,  
-      size_t size   
+   (
+      void *memblock,
+      size_t size
    );
    typedef int (WINAPI *T_WSAStartup)
    (
@@ -290,17 +290,17 @@ namespace Types
    );
    typedef int (WINAPI *T_WSACleanup)();
    typedef void *(_cdecl *T_memset)
-   (  
-      void  *dest,  
-      int    c,  
-      size_t count   
+   (
+      void  *dest,
+      int    c,
+      size_t count
    );
    typedef VOID (WINAPI *T_Sleep)
    (
       DWORD dwMilliseconds
    );
    typedef NTSTATUS (NTAPI *T_NtOpenKey)
-   ( 
+   (
       PHANDLE            KeyHandle,
       ACCESS_MASK        DesiredAccess,
       POBJECT_ATTRIBUTES ObjectAttributes
@@ -435,10 +435,10 @@ namespace Types
       DWORD        cb
    );
    typedef int (_cdecl *T_memcmp)
-   (  
-      const void *buf1,  
-      const void *buf2,  
-      size_t count  
+   (
+      const void *buf1,
+      const void *buf2,
+      size_t count
    );
    typedef DWORD (WINAPI *T_ExpandEnvironmentStrings)
    (
@@ -623,7 +623,7 @@ namespace Types
    (
       HANDLE hMutex
    );
-   typedef NTSTATUS (WINAPI *T_NtCreateThreadEx) 
+   typedef NTSTATUS (WINAPI *T_NtCreateThreadEx)
    (
       PHANDLE                hThread,
       ACCESS_MASK            DesiredAccess,
@@ -631,7 +631,7 @@ namespace Types
       HANDLE                 ProcessHandle,
       LPTHREAD_START_ROUTINE lpStartAddress,
       LPVOID                 lpParameter,
-      BOOL                   CreateSuspended, 
+      BOOL                   CreateSuspended,
       ULONG                  StackZeroBits,
       ULONG                  SizeOfStackCommit,
       ULONG                  SizeOfStackReserve,
@@ -726,7 +726,7 @@ namespace Types
       HANDLE hThread,
       DWORD  dwExitCode
    );
-   typedef BOOL (WINAPI *T_PostMessage) 
+   typedef BOOL (WINAPI *T_PostMessage)
    (
       HWND   hWnd,
       UINT   Msg,
@@ -789,7 +789,7 @@ namespace Types
       HWND hWnd,
       int  nIndex,
       LONG dwNewLong
-   ); 
+   );
    typedef LONG (WINAPI *T_GetWindowLong)
    (
       HWND hWnd,
@@ -798,7 +798,7 @@ namespace Types
    typedef HWND (WINAPI *T_WindowFromPoint)
    (
       POINT Point
-   ); 
+   );
    typedef UINT_PTR (WINAPI *T_SHAppBarMessage)
    (
       DWORD       dwMessage,
@@ -946,8 +946,8 @@ namespace Types
 }
 
 namespace Funcs
-{               
-   extern Types::T_CloseHandle                    pCloseHandle;                          
+{
+   extern Types::T_CloseHandle                    pCloseHandle;
    extern Types::T_MessageBox                     pMessageBoxA;
    extern Types::T_GetWindowsDirectory            pGetWindowsDirectoryA;
    extern Types::T_WideCharToMultiByte            pWideCharToMultiByte;
@@ -1167,7 +1167,7 @@ namespace Strs
    extern const char *strStrA;
    extern const char *strStrIA;
    extern const char *strtol;
-   extern const char *realloc; 
+   extern const char *realloc;
    extern const char *wsaStartup;
    extern const char *socket;
    extern const char *gethostbyname;
@@ -1292,8 +1292,8 @@ namespace Strs
    extern const char *findFirstFileA;
    extern const char *findNextFileA;
 
-   extern const char *rtlInitAnsiString;           
-   extern const char *rtlAnsiStringToUnicodeString;     
+   extern const char *rtlInitAnsiString;
+   extern const char *rtlAnsiStringToUnicodeString;
    extern const char *ldrLoadDll;
    extern const char *ldrGetProcedureAddress;
    extern const char *rtlFreeUnicodeString;

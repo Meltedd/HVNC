@@ -92,12 +92,12 @@ static void ToggleFullscreen(HWND hWnd, Client *client)
    else
    {
       SetWindowLong(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-      SetWindowPos(hWnd, 
-         HWND_NOTOPMOST, 
-         client->windowedRect.left, 
-         client->windowedRect.top, 
-         client->windowedRect.left - client->windowedRect.right, 
-         client->windowedRect.bottom - client->windowedRect.top, 
+      SetWindowPos(hWnd,
+         HWND_NOTOPMOST,
+         client->windowedRect.left,
+         client->windowedRect.top,
+         client->windowedRect.left - client->windowedRect.right,
+         client->windowedRect.bottom - client->windowedRect.top,
          SWP_SHOWWINDOW);
    }
    client->fullScreen = !client->fullScreen;
@@ -106,14 +106,14 @@ static void ToggleFullscreen(HWND hWnd, Client *client)
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    Client *client = GetClient(hWnd, FALSE);
-   
+
    switch(msg)
    {
       case WM_CREATE:
       {
          HMENU hSysMenu = GetSystemMenu(hWnd, false);
          AppendMenu(hSysMenu, MF_SEPARATOR, 0, NULL);
-         
+
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::fullScreen,     TEXT("&Fullscreen"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startExplorer,  TEXT("Start Explorer"));
          AppendMenu(hSysMenu, MF_STRING, SysMenuIds::startRun,       TEXT("&Run..."));
@@ -203,7 +203,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          return DefWindowProc(hWnd, msg, wParam, lParam);
       }
       case WM_PAINT:
-      {  
+      {
          PAINTSTRUCT ps;
          HDC         hDc = BeginPaint(hWnd, &ps);
 
@@ -225,7 +225,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          DeleteObject(hBrush);
 
          BitBlt(hDc, 0, 0, client->pixelsWidth, client->pixelsHeight, client->hDcBmp, 0, 0, SRCCOPY);
-	      EndPaint(hWnd, &ps);
+         EndPaint(hWnd, &ps);
          break;
       }
       case WM_DESTROY:
@@ -346,7 +346,7 @@ static DWORD WINAPI ClientThread(PVOID param)
    {
       SOCKADDR_IN addr;
       int         addrSize;
-      addrSize = sizeof(addr); 
+      addrSize = sizeof(addr);
       getpeername(s, (SOCKADDR *) &addr, &addrSize);
       uhid = addr.sin_addr.S_un.S_addr;
    }
@@ -547,7 +547,7 @@ exit:
          closesocket(client->connections[Connection::input]);
          closesocket(client->connections[Connection::desktop]);
          CloseHandle(client->minEvent);
-         memset(client, 0, sizeof(*client)); 
+         memset(client, 0, sizeof(*client));
       }
       LeaveCriticalSection(&g_critSec);
    }

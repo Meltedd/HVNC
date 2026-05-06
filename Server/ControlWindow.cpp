@@ -29,21 +29,21 @@ HWND CW_Create(DWORD uhid, DWORD width, DWORD height)
 
    wsprintf(title, titlePattern, inet_ntoa(addr));
 
-   HWND hWnd = CreateWindow(className, 
-      title, 
-      WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX | WS_SYSMENU, 
-      CW_USEDEFAULT, 
-      CW_USEDEFAULT, 
-      width, 
-      height, 
+   HWND hWnd = CreateWindow(className,
+      title,
+      WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX | WS_SYSMENU,
+      CW_USEDEFAULT,
+      CW_USEDEFAULT,
+      width,
+      height,
       NULL,
-      NULL, 
-      GetModuleHandle(NULL), 
+      NULL,
+      GetModuleHandle(NULL),
       NULL);
 
    if(hWnd == NULL)
       return NULL;
 
-   ShowWindow(hWnd, SW_SHOW); 
+   ShowWindow(hWnd, SW_SHOW);
    return hWnd;
 }

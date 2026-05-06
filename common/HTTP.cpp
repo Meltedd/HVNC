@@ -51,7 +51,7 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
       if(Funcs::pSend(s, (char *) httpRequestData.inputBody, httpRequestData.inputBodySize, 0) <= 0)
          goto exit;
    }
-   
+
    char header[1024] = { 0 };
    int contentLength = -1;
    int lastPos = 0;
