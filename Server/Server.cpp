@@ -1,6 +1,5 @@
 #include "Server.h"
 
-#include "_version.h"
 
 typedef NTSTATUS (NTAPI *T_RtlDecompressBuffer)
 (
