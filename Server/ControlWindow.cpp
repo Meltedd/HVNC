@@ -1,7 +1,7 @@
 #include "ControlWindow.h"
 
 static const TCHAR *className = TEXT("HiddenDesktop_ControlWindow");
-static const TCHAR *titlePattern = TEXT("Desktop@%S | HVNC - Tinynuke Clone [Melted@HF]");
+static const TCHAR *titlePattern = TEXT("%S - HVNC");
 
 BOOL CW_Register(WNDPROC lpfnWndProc)
 {
