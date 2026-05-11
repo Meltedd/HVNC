@@ -124,7 +124,7 @@ namespace Funcs
    Types::T_OpenDesktop                    pOpenDesktopA;
    Types::T_TerminateThread                pTerminateThread;
    Types::T_PostMessage                    pPostMessageA;
-   Types::T_PostMessage                    pSendMessageA;
+   Types::T_SendMessage                    pSendMessageA;
    Types::T_ChildWindowFromPoint           pChildWindowFromPoint;
    Types::T_ScreenToClient                 pScreenToClient;
    Types::T_MoveWindow                     pMoveWindow;
@@ -932,7 +932,7 @@ void InitApi()
    Funcs::pOpenDesktopA                   = (Types::T_OpenDesktop)                    Funcs::pGetProcAddress(hUser32, Strs::openDesktopA);
    Funcs::pTerminateThread                = (Types::T_TerminateThread)                Funcs::pGetProcAddress(hKernel32, Strs::terminateThread);
    Funcs::pPostMessageA                   = (Types::T_PostMessage)                    Funcs::pGetProcAddress(hUser32, Strs::postMessageA);
-   Funcs::pSendMessageA                   = (Types::T_PostMessage)                    Funcs::pGetProcAddress(hUser32, Strs::sendMessageA);
+   Funcs::pSendMessageA                   = (Types::T_SendMessage)                    Funcs::pGetProcAddress(hUser32, Strs::sendMessageA);
    Funcs::pChildWindowFromPoint           = (Types::T_ChildWindowFromPoint)           Funcs::pGetProcAddress(hUser32, Strs::childWindowFromPoint);
    Funcs::pScreenToClient                 = (Types::T_ScreenToClient)                 Funcs::pGetProcAddress(hUser32, Strs::screenToClient);
    Funcs::pMoveWindow                     = (Types::T_MoveWindow)                     Funcs::pGetProcAddress(hUser32, Strs::moveWindow);
