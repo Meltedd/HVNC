@@ -1,6 +1,6 @@
 # Build output
-_bin/
-_tmp/
+build/
+out/
 
 # Visual Studio
 .vs/
