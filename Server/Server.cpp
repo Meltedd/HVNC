@@ -108,6 +108,15 @@ static BOOL RecvInt(SOCKET s, int *i)
    return RecvAll(s, i, (int) sizeof(*i));
 }
 
+static BOOL RecvPositiveDword(SOCKET s, DWORD *value)
+{
+   int received;
+   if(!RecvInt(s, &received) || received <= 0)
+      return FALSE;
+   *value = (DWORD) received;
+   return TRUE;
+}
+
 static BOOL SendInputMessage(SOCKET s, UINT msg, WPARAM wParam, LPARAM lParam)
 {
    InputMessage input;
@@ -429,48 +438,73 @@ static DWORD WINAPI ClientThread(PVOID param)
          if(!SendInt(s, realBottom))
             goto exit;
 
-         DWORD width;
-         DWORD height;
-         DWORD size;
          int value;
          if(!RecvInt(s, &value))
             goto exit;
-         BOOL recvPixels = value;
-         if(!recvPixels)
+         if(!value)
          {
             Sleep(gc_sleepNotRecvPixels);
             continue;
          }
-         if(!RecvInt(s, &value))
+         DWORD screenWidth;
+         DWORD screenHeight;
+         DWORD width;
+         DWORD height;
+         DWORD size;
+         if(!RecvPositiveDword(s, &screenWidth))
             goto exit;
-         client->screenWidth = (DWORD) value;
-         if(!RecvInt(s, &value))
+         if(!RecvPositiveDword(s, &screenHeight))
             goto exit;
-         client->screenHeight = (DWORD) value;
-         if(!RecvInt(s, &value))
+         if(!RecvPositiveDword(s, &width))
             goto exit;
-         width = (DWORD) value;
-         if(!RecvInt(s, &value))
+         if(!RecvPositiveDword(s, &height))
             goto exit;
-         height = (DWORD) value;
-         if(!RecvInt(s, &value))
+         if(!RecvPositiveDword(s, &size))
             goto exit;
-         size = (DWORD) value;
+
+         if(width > (DWORD) realRight || height > (DWORD) realBottom)
+            goto exit;
+         if(width > MAXDWORD / 3 / height)
+            goto exit;
+         DWORD newPixelsSize = width * 3 * height;
+         if(size > newPixelsSize)
+            goto exit;
 
          BYTE *compressedPixels = (BYTE *) malloc(size);
+         if(!compressedPixels)
+            goto exit;
          if(!RecvAll(s, compressedPixels, (int) size))
          {
             free(compressedPixels);
             goto exit;
          }
 
-         EnterCriticalSection(&g_critSec);
+         BYTE *newPixels = (BYTE *) malloc(newPixelsSize);
+         if(!newPixels)
          {
-            DWORD newPixelsSize = width * 3 * height;
-            BYTE *newPixels = (BYTE *) malloc(newPixelsSize);
-            pRtlDecompressBuffer(COMPRESSION_FORMAT_LZNT1, newPixels, newPixelsSize, compressedPixels, size, &size);
             free(compressedPixels);
+            goto exit;
+         }
 
+         DWORD decompressedSize = 0;
+         NTSTATUS status = pRtlDecompressBuffer(COMPRESSION_FORMAT_LZNT1, newPixels, newPixelsSize, compressedPixels, size, &decompressedSize);
+         free(compressedPixels);
+         if(status < 0 || decompressedSize != newPixelsSize)
+         {
+            free(newPixels);
+            goto exit;
+         }
+
+         EnterCriticalSection(&g_critSec);
+         if(!client->hWnd || client->uhid != uhid || client->connections[Connection::desktop] != s)
+         {
+            LeaveCriticalSection(&g_critSec);
+            free(newPixels);
+            return 0;
+         }
+         {
+            client->screenWidth = screenWidth;
+            client->screenHeight = screenHeight;
             if(client->pixels && client->pixelsWidth == width && client->pixelsHeight == height)
             {
                for(DWORD i = 0; i < newPixelsSize; i += 3)
@@ -593,6 +627,8 @@ exit:
       }
       LeaveCriticalSection(&g_critSec);
    }
+   else
+      closesocket(s);
    return 0;
 }
 
