@@ -126,6 +126,14 @@ static BOOL SendInputMessage(SOCKET s, UINT msg, WPARAM wParam, LPARAM lParam)
    return SendAll(s, &input, (int) sizeof(input));
 }
 
+static void SendClientInput(Client *client, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+   EnterCriticalSection(&g_critSec);
+   if(!SendInputMessage(client->connections[Connection::input], msg, wParam, lParam))
+      PostQuitMessage(0);
+   LeaveCriticalSection(&g_critSec);
+}
+
 static void ToggleFullscreen(HWND hWnd, Client *client)
 {
    if(!client->fullScreen)
@@ -175,80 +183,32 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
       }
       case WM_SYSCOMMAND:
       {
-         if(wParam == SC_RESTORE)
-            SetEvent(client->minEvent);
 /*
-         else if(wParam == SysMenuIds::fullScreen || (wParam == SC_KEYMENU && toupper(lParam) == 'F'))
+         if(wParam == SysMenuIds::fullScreen || (wParam == SC_KEYMENU && toupper(lParam) == 'F'))
          {
             ToggleFullscreen(hWnd, client);
             break;
          }
 */
-         else if(wParam == SysMenuIds::startExplorer)
+         switch(wParam)
          {
-            EnterCriticalSection(&g_critSec);
-            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startExplorer, NULL, NULL))
-               PostQuitMessage(0);
-            LeaveCriticalSection(&g_critSec);
-            break;
+            case SC_RESTORE:
+               SetEvent(client->minEvent);
+               return DefWindowProc(hWnd, msg, wParam, lParam);
+            case SysMenuIds::startExplorer:
+            case SysMenuIds::startRun:
+            case SysMenuIds::startPowershell:
+            case SysMenuIds::startChrome:
+            case SysMenuIds::startBrave:
+            case SysMenuIds::startEdge:
+            case SysMenuIds::startFirefox:
+            case SysMenuIds::startIexplore:
+               SendClientInput(client, (UINT) wParam, NULL, NULL);
+               break;
+            default:
+               return DefWindowProc(hWnd, msg, wParam, lParam);
          }
-         else if(wParam == SysMenuIds::startRun)
-         {
-            EnterCriticalSection(&g_critSec);
-            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startRun, NULL, NULL))
-               PostQuitMessage(0);
-            LeaveCriticalSection(&g_critSec);
-            break;
-         }
-         else if (wParam == SysMenuIds::startPowershell)
-         {
-             EnterCriticalSection(&g_critSec);
-             if (!SendInputMessage(client->connections[Connection::input], SysMenuIds::startPowershell, NULL, NULL))
-                 PostQuitMessage(0);
-             LeaveCriticalSection(&g_critSec);
-             break;
-         }
-         else if(wParam == SysMenuIds::startChrome)
-         {
-            EnterCriticalSection(&g_critSec);
-            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startChrome, NULL, NULL))
-               PostQuitMessage(0);
-            LeaveCriticalSection(&g_critSec);
-            break;
-         }
-         else if (wParam == SysMenuIds::startBrave)
-         {
-             EnterCriticalSection(&g_critSec);
-             if (!SendInputMessage(client->connections[Connection::input], SysMenuIds::startBrave, NULL, NULL))
-                 PostQuitMessage(0);
-             LeaveCriticalSection(&g_critSec);
-             break;
-         }
-         else if (wParam == SysMenuIds::startEdge)
-         {
-             EnterCriticalSection(&g_critSec);
-             if (!SendInputMessage(client->connections[Connection::input], SysMenuIds::startEdge, NULL, NULL))
-                 PostQuitMessage(0);
-             LeaveCriticalSection(&g_critSec);
-             break;
-         }
-         else if(wParam == SysMenuIds::startFirefox)
-         {
-            EnterCriticalSection(&g_critSec);
-            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startFirefox, NULL, NULL))
-               PostQuitMessage(0);
-            LeaveCriticalSection(&g_critSec);
-            break;
-         }
-         else if(wParam == SysMenuIds::startIexplore)
-         {
-            EnterCriticalSection(&g_critSec);
-            if(!SendInputMessage(client->connections[Connection::input], SysMenuIds::startIexplore, NULL, NULL))
-               PostQuitMessage(0);
-            LeaveCriticalSection(&g_critSec);
-            break;
-         }
-         return DefWindowProc(hWnd, msg, wParam, lParam);
+         break;
       }
       case WM_PAINT:
       {
@@ -307,20 +267,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
          x = (int) (x * ratioX);
          y = (int) (y * ratioY);
          lParam = MAKELPARAM(x, y);
-         EnterCriticalSection(&g_critSec);
-         if(!SendInputMessage(client->connections[Connection::input], msg, wParam, lParam))
-            PostQuitMessage(0);
-         LeaveCriticalSection(&g_critSec);
+         SendClientInput(client, msg, wParam, lParam);
          break;
       }
       case WM_CHAR:
       {
          if(iscntrl(wParam))
             break;
-         EnterCriticalSection(&g_critSec);
-         if(!SendInputMessage(client->connections[Connection::input], msg, wParam, 0))
-            PostQuitMessage(0);
-         LeaveCriticalSection(&g_critSec);
+         SendClientInput(client, msg, wParam, 0);
          break;
       }
       case WM_KEYDOWN:
@@ -344,10 +298,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
             default:
                return 0;
          }
-         EnterCriticalSection(&g_critSec);
-         if(!SendInputMessage(client->connections[Connection::input], msg, wParam, 0))
-            PostQuitMessage(0);
-         LeaveCriticalSection(&g_critSec);
+         SendClientInput(client, msg, wParam, 0);
          break;
       }
       case WM_GETMINMAXINFO:
