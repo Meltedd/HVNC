@@ -31,6 +31,8 @@ struct Client
    DWORD  pixelsWidth, pixelsHeight;
    DWORD  screenWidth, screenHeight;
    HDC    hDcBmp;
+   HBITMAP hBmp;
+   HGDIOBJ hOldBmp;
    HANDLE minEvent;
    BOOL   fullScreen;
    RECT   windowedRect;
@@ -68,6 +70,16 @@ static Client *GetClientByHwnd(HWND hWnd)
          return &g_clients[i];
    }
    return NULL;
+}
+
+static void DeleteClientBitmap(HDC hDcBmp, HBITMAP hBmp, HGDIOBJ hOldBmp)
+{
+   if(hDcBmp && hOldBmp)
+      SelectObject(hDcBmp, hOldBmp);
+   if(hBmp)
+      DeleteObject(hBmp);
+   if(hDcBmp)
+      DeleteDC(hDcBmp);
 }
 
 static BOOL SendAll(SOCKET s, const void *buffer, int size)
@@ -447,6 +459,7 @@ static DWORD WINAPI ClientThread(PVOID param)
          }
 
          EnterCriticalSection(&g_critSec);
+         BOOL frameReady = FALSE;
          if(!client->hWnd || client->uhid != uhid || client->connections[Connection::desktop] != s)
          {
             LeaveCriticalSection(&g_critSec);
@@ -454,8 +467,18 @@ static DWORD WINAPI ClientThread(PVOID param)
             return 0;
          }
          {
-            client->screenWidth = screenWidth;
-            client->screenHeight = screenHeight;
+            BYTE   *oldPixels = NULL;
+            HDC     hDc = GetDC(NULL);
+            HDC     hDcBmp = NULL;
+            HBITMAP hBmp = NULL;
+            HGDIOBJ hOldBmp = NULL;
+            HDC     oldDcBmp = NULL;
+            HBITMAP oldBmp = NULL;
+            HGDIOBJ oldSelectedObject = NULL;
+
+            if(!hDc)
+               goto frame_cleanup;
+
             if(client->pixels && client->pixelsWidth == width && client->pixelsHeight == height)
             {
                for(DWORD i = 0; i < newPixelsSize; i += 3)
@@ -464,49 +487,75 @@ static DWORD WINAPI ClientThread(PVOID param)
                      newPixels[i + 1] == GetGValue(gc_trans) &&
                      newPixels[i + 2] == GetBValue(gc_trans))
                   {
-                     continue;
+                     newPixels[i] = client->pixels[i];
+                     newPixels[i + 1] = client->pixels[i + 1];
+                     newPixels[i + 2] = client->pixels[i + 2];
                   }
-                  client->pixels[i] = newPixels[i];
-                  client->pixels[i + 1] = newPixels[i + 1];
-                  client->pixels[i + 2] = newPixels[i + 2];
                }
-               free(newPixels);
-            }
-            else
-            {
-               free(client->pixels);
-               client->pixels = newPixels;
             }
 
-            HDC hDc = GetDC(NULL);
-            HDC hDcBmp = CreateCompatibleDC(hDc);
-            HBITMAP hBmp;
+            hDcBmp = CreateCompatibleDC(hDc);
+            if(!hDcBmp)
+               goto frame_cleanup;
 
             hBmp = CreateCompatibleBitmap(hDc, width, height);
-            SelectObject(hDcBmp, hBmp);
+            if(!hBmp)
+               goto frame_cleanup;
 
             bmpInfo.bmiHeader.biSizeImage = newPixelsSize;
             bmpInfo.bmiHeader.biWidth = width;
             bmpInfo.bmiHeader.biHeight = height;
-            SetDIBits(hDcBmp,
+            if(SetDIBits(hDcBmp,
                hBmp,
                0,
                height,
-               client->pixels,
+               newPixels,
                &bmpInfo,
-               DIB_RGB_COLORS);
+               DIB_RGB_COLORS) != (int) height)
+            {
+               goto frame_cleanup;
+            }
 
-            DeleteDC(client->hDcBmp);
+            hOldBmp = SelectObject(hDcBmp, hBmp);
+            if(!hOldBmp)
+               goto frame_cleanup;
+
+            oldDcBmp = client->hDcBmp;
+            oldBmp = client->hBmp;
+            oldSelectedObject = client->hOldBmp;
+            oldPixels = client->pixels;
+
+            client->screenWidth = screenWidth;
+            client->screenHeight = screenHeight;
+            client->pixels = newPixels;
             client->pixelsWidth = width;
             client->pixelsHeight = height;
             client->hDcBmp = hDcBmp;
+            client->hBmp = hBmp;
+            client->hOldBmp = hOldBmp;
+
+            newPixels = NULL;
+            hDcBmp = NULL;
+            hBmp = NULL;
+            hOldBmp = NULL;
+            frameReady = TRUE;
+
+            DeleteClientBitmap(oldDcBmp, oldBmp, oldSelectedObject);
+            free(oldPixels);
 
             InvalidateRgn(client->hWnd, NULL, TRUE);
 
-            DeleteObject(hBmp);
-            ReleaseDC(NULL, hDc);
+frame_cleanup:
+            DeleteClientBitmap(hDcBmp, hBmp, hOldBmp);
+            if(hDc)
+               ReleaseDC(NULL, hDc);
+            if(!frameReady)
+               free(newPixels);
          }
          LeaveCriticalSection(&g_critSec);
+
+         if(!frameReady)
+            goto exit;
 
          if(!SendInt(s, 0))
             goto exit;
@@ -570,7 +619,7 @@ exit:
       {
          wprintf(TEXT("[!] Client %S Disconnected\n"), ip);
          free(client->pixels);
-         DeleteDC(client->hDcBmp);
+         DeleteClientBitmap(client->hDcBmp, client->hBmp, client->hOldBmp);
          closesocket(client->connections[Connection::input]);
          closesocket(client->connections[Connection::desktop]);
          CloseHandle(client->minEvent);

