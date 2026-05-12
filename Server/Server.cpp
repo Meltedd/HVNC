@@ -594,6 +594,7 @@ exit:
          {
             wprintf(TEXT("[!] Client %S Disconnected: Maximum %d Clients Allowed\n"), ip, gc_maxClients);
             closesocket(s);
+            LeaveCriticalSection(&g_critSec);
             return 0;
          }
 
