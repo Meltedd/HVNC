@@ -12,6 +12,16 @@ inline const char* operator "" END_ENC_STR(const char* str, size_t n)
 #define END_ENC_STR
 #endif
 
+#if !defined(__UNICODE_STRING_DEFINED)
+#define __UNICODE_STRING_DEFINED
+typedef struct _UNICODE_STRING
+{
+   USHORT Length;
+   USHORT MaximumLength;
+   PWSTR  Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
+#endif
+
 #if !defined(__OBJECT_ATTRIBUTES_DEFINED)
 #define __OBJECT_ATTRIBUTES_DEFINED
 typedef struct _OBJECT_ATTRIBUTES
