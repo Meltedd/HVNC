@@ -1,5 +1,5 @@
 #include "HiddenDesktop.h"
-#include <Windows.h>
+#include <windows.h>
 
 #define TIMEOUT INFINITE
 

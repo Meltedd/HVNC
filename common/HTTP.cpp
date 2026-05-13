@@ -4,7 +4,14 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
 {
    BOOL ret = FALSE;
    WSADATA wsa;
-   SOCKET s;
+   SOCKET s = INVALID_SOCKET;
+   hostent *he = NULL;
+   struct sockaddr_in addr = { 0 };
+   char header[1024] = { 0 };
+   int contentLength = -1;
+   int lastPos = 0;
+   BOOL firstLine = TRUE;
+   BOOL transferChunked = FALSE;
 
    char request[1024] = { 0 };
 
@@ -32,11 +39,10 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
    if((s = Funcs::pSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
       goto exit;
 
-   hostent *he = Funcs::pGethostbyname(httpRequestData.host);
+   he = Funcs::pGethostbyname(httpRequestData.host);
    if(!he)
       goto exit;
 
-   struct sockaddr_in addr;
    Funcs::pMemcpy(&addr.sin_addr, he->h_addr_list[0], he->h_length);
    addr.sin_family = AF_INET;
    addr.sin_port = Funcs::pHtons(httpRequestData.port);
@@ -51,12 +57,6 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
       if(Funcs::pSend(s, (char *) httpRequestData.inputBody, httpRequestData.inputBodySize, 0) <= 0)
          goto exit;
    }
-
-   char header[1024] = { 0 };
-   int contentLength = -1;
-   int lastPos = 0;
-   BOOL firstLine = TRUE;
-   BOOL transferChunked = FALSE;
 
    for(int i = 0;; ++i)
    {
@@ -95,7 +95,7 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
                   contentLength = Funcs::pStrtol(value, &endPtr, 10);
                   if(endPtr == value)
                      goto exit;
-                  if(value < 0)
+                  if(contentLength < 0)
                      goto exit;
                }
                else if(!Funcs::pLstrcmpiA(name, Strs::httpReq8))
@@ -190,7 +190,8 @@ exit:
       httpRequestData.outputBody = NULL;
       Funcs::pFree(httpRequestData.outputBody);
    }
-   Funcs::pClosesocket(s);
+   if(s != INVALID_SOCKET)
+      Funcs::pClosesocket(s);
    Funcs::pWSACleanup();
    return ret;
 }

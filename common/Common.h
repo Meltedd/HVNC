@@ -3,17 +3,18 @@
 #pragma warning(disable: 4267)
 #pragma warning(disable: 4244)
 #pragma warning(disable: 4533)
-#include <WinSock.h>
-#include <Windows.h>
-#include <Stdio.h>
-#include <Security.h>
-#include <Sddl.h>
-#include <Shlwapi.h>
-#include <Shlobj.h>
-#include <TlHelp32.h>
-#include <Psapi.h>
-#include <Wininet.h>
-#include <Urlmon.h>
+#include <winsock.h>
+#include <windows.h>
+#include <stdio.h>
+#include <ntdef.h>
+#include <security.h>
+#include <sddl.h>
+#include <shlwapi.h>
+#include <shlobj.h>
+#include <tlhelp32.h>
+#include <psapi.h>
+#include <wininet.h>
+#include <urlmon.h>
 #include "Api.h"
 #include "Utils.h"
 #include "Inject.h"

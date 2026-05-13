@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "mingw64-release",
+      "displayName": "MinGW-w64 x64 Release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/mingw64-release",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/mingw64.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "mingw64-release",
+      "configurePreset": "mingw64-release"
+    }
+  ]
+}

