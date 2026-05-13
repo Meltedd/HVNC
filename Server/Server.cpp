@@ -715,7 +715,14 @@ BOOL StartServer(int port)
    {
       SOCKET      s;
       sockaddr_in addr;
+      int         addrSize = sizeof(addr);
       s = accept(serverSocket, (sockaddr *) &addr, &addrSize);
-      CreateThread(NULL, 0, ClientThread, (LPVOID) s, 0, 0);
+      if(s == INVALID_SOCKET)
+         continue;
+      HANDLE h = CreateThread(NULL, 0, ClientThread, (LPVOID) s, 0, 0);
+      if(h)
+         CloseHandle(h);
+      else
+         closesocket(s);
    }
 }
