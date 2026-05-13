@@ -6,7 +6,6 @@
 #include <winsock.h>
 #include <windows.h>
 #include <stdio.h>
-#include <ntdef.h>
 #include <security.h>
 #include <sddl.h>
 #include <shlwapi.h>

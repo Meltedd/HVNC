@@ -12,6 +12,23 @@ inline const char* operator "" END_ENC_STR(const char* str, size_t n)
 #define END_ENC_STR
 #endif
 
+#if !defined(__OBJECT_ATTRIBUTES_DEFINED)
+#define __OBJECT_ATTRIBUTES_DEFINED
+typedef struct _OBJECT_ATTRIBUTES
+{
+   ULONG           Length;
+   HANDLE          RootDirectory;
+   PUNICODE_STRING ObjectName;
+   ULONG           Attributes;
+   PVOID           SecurityDescriptor;
+   PVOID           SecurityQualityOfService;
+} OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
+#endif
+
+#if !defined(OBJ_CASE_INSENSITIVE)
+#define OBJ_CASE_INSENSITIVE 0x00000040L
+#endif
+
 struct CLIENT_ID { DWORD UniqueProcess; DWORD UniqueThread; };
 
 typedef struct _PROCESS_BASIC_INFORMATION
