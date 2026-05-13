@@ -15,6 +15,7 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
 
    char request[1024] = { 0 };
 
+   httpRequestData.outputBody = NULL;
    httpRequestData.outputBodySize = 0;
    Funcs::pLstrcpyA(request, (httpRequestData.post ? Strs::postSpace : Strs::getSpace));
    Funcs::pLstrcatA(request, httpRequestData.path);
@@ -187,8 +188,8 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
 exit:
    if(!ret)
    {
-      httpRequestData.outputBody = NULL;
       Funcs::pFree(httpRequestData.outputBody);
+      httpRequestData.outputBody = NULL;
    }
    if(s != INVALID_SOCKET)
       Funcs::pClosesocket(s);
