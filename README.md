@@ -21,12 +21,29 @@ on the target machine.
 - Hidden client console
 - Configurable listening port
 
+## Build
+
+On Windows, build with Visual Studio or CMake:
+
+```sh
+cmake -B build -A x64
+cmake --build build --config Release
+```
+
+Use `-A Win32` for a 32-bit Windows build.
+
+On Linux, use the MinGW-w64 preset:
+
+```sh
+cmake --preset mingw64-release
+cmake --build --preset mingw64-release
+```
+
 ## Usage
 
 1. Set the server IP and port in `Client/Main.cpp`.
-2. Build the client and server: open the folder in Visual Studio, or run `cmake -B build -A x64 && cmake --build build --config Release` (`-A Win32` for 32-bit).
-3. Run the server and enter the listening port when prompted.
-4. Run the client, then right click the hidden desktop's title bar to
+2. Run the server and enter the listening port when prompted.
+3. Run the client, then right click the hidden desktop's title bar to
    access commands.
 
 ## License
