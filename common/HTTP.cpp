@@ -1,9 +1,25 @@
 #include "HTTP.h"
+#include <limits.h>
+
+static BOOL RecvAll(SOCKET s, void *buffer, int size)
+{
+   char *data = (char *) buffer;
+   int received = 0;
+   while(received != size)
+   {
+      int ret = Funcs::pRecv(s, data + received, size - received, 0);
+      if(ret <= 0)
+         return FALSE;
+      received += ret;
+   }
+   return TRUE;
+}
 
 BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
 {
    BOOL ret = FALSE;
    WSADATA wsa;
+   BOOL wsaStarted = FALSE;
    SOCKET s = INVALID_SOCKET;
    hostent *he = NULL;
    struct sockaddr_in addr = { 0 };
@@ -36,6 +52,7 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
 
    if(Funcs::pWSAStartup(MAKEWORD(2, 2), &wsa) != 0)
       goto exit;
+   wsaStarted = TRUE;
 
    if((s = Funcs::pSocket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
       goto exit;
@@ -116,9 +133,10 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
 
       char sizeStr[10] = { 0 };
       int allocatedSize = reallocSize;
-      int read = 0;
 
       httpRequestData.outputBody = (BYTE *) Alloc(reallocSize);
+      if(!httpRequestData.outputBody)
+         goto exit;
       for(int i = 0;;)
       {
          if(i > sizeof(sizeStr) - 1)
@@ -139,23 +157,33 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
                httpRequestData.outputBody[httpRequestData.outputBodySize] = 0;
                break;
             }
-            httpRequestData.outputBodySize += size;
-            if(allocatedSize < httpRequestData.outputBodySize + 1)
-            {
-               allocatedSize += httpRequestData.outputBodySize + reallocSize;
-               httpRequestData.outputBody = (BYTE *) ReAlloc(httpRequestData.outputBody, allocatedSize);
-            }
-            int chunkRead = 0;
-            do
-            {
-               int read2 = Funcs::pRecv(s, (char *) httpRequestData.outputBody + read + chunkRead, size - chunkRead, 0);
-               if(read2 <= 0)
-                  goto exit;
-               chunkRead += read2;
-            } while(chunkRead != size);
-            if(Funcs::pRecv(s, sizeStr, 2, 0) <= 0)
+            int oldOutputBodySize = httpRequestData.outputBodySize;
+            if(size > INT_MAX - oldOutputBodySize - 1)
                goto exit;
-            read += size;
+
+            int newOutputBodySize = oldOutputBodySize + size;
+            if(allocatedSize < newOutputBodySize + 1)
+            {
+               if(newOutputBodySize > INT_MAX - reallocSize)
+                  goto exit;
+
+               int newAllocatedSize = newOutputBodySize + reallocSize;
+               BYTE *newOutputBody = (BYTE *) ReAlloc(httpRequestData.outputBody, newAllocatedSize);
+               if(!newOutputBody)
+                  goto exit;
+
+               httpRequestData.outputBody = newOutputBody;
+               allocatedSize = newAllocatedSize;
+            }
+            if(!RecvAll(s, (char *) httpRequestData.outputBody + oldOutputBodySize, size))
+               goto exit;
+
+            httpRequestData.outputBodySize = newOutputBodySize;
+            char chunkEnd[2];
+            if(!RecvAll(s, chunkEnd, (int) sizeof(chunkEnd)))
+               goto exit;
+            if(chunkEnd[0] != '\r' || chunkEnd[1] != '\n')
+               goto exit;
             i = 0;
             continue;
          }
@@ -166,21 +194,23 @@ BOOL HttpSubmitRequest(HttpRequestData &httpRequestData)
    {
       if(contentLength > 0)
       {
+         if(contentLength > INT_MAX - 1)
+            goto exit;
+
          httpRequestData.outputBody = (BYTE *) Alloc(contentLength + 1);
+         if(!httpRequestData.outputBody)
+            goto exit;
+         if(!RecvAll(s, httpRequestData.outputBody, contentLength))
+            goto exit;
+
          httpRequestData.outputBodySize = contentLength;
          httpRequestData.outputBody[httpRequestData.outputBodySize] = 0;
-         int totalRead = 0;
-         do
-         {
-            int read = Funcs::pRecv(s, (char *) httpRequestData.outputBody + totalRead, contentLength - totalRead, 0);
-            if(read <= 0) goto exit;
-            totalRead += read;
-         }
-         while(totalRead != contentLength);
       }
       else
       {
          httpRequestData.outputBody = (BYTE *) Alloc(1);
+         if(!httpRequestData.outputBody)
+            goto exit;
          httpRequestData.outputBody[0] = 0;
       }
    }
@@ -190,9 +220,11 @@ exit:
    {
       Funcs::pFree(httpRequestData.outputBody);
       httpRequestData.outputBody = NULL;
+      httpRequestData.outputBodySize = 0;
    }
    if(s != INVALID_SOCKET)
       Funcs::pClosesocket(s);
-   Funcs::pWSACleanup();
+   if(wsaStarted)
+      Funcs::pWSACleanup();
    return ret;
 }
