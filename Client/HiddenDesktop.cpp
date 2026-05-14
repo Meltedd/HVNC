@@ -430,8 +430,12 @@ static DWORD WINAPI DesktopThread(LPVOID param)
     {
         DWORD workSpaceSize;
         DWORD fragmentWorkSpaceSize;
-        Funcs::pRtlGetCompressionWorkSpaceSize(COMPRESSION_FORMAT_LZNT1, &workSpaceSize, &fragmentWorkSpaceSize);
+        NTSTATUS status = Funcs::pRtlGetCompressionWorkSpaceSize(COMPRESSION_FORMAT_LZNT1, &workSpaceSize, &fragmentWorkSpaceSize);
+        if (status < 0)
+            goto exit;
         workSpace = (BYTE *)Alloc(workSpaceSize);
+        if (!workSpace)
+            goto exit;
     }
 
     for (;;)
@@ -451,11 +455,8 @@ static DWORD WINAPI DesktopThread(LPVOID param)
             continue;
         }
 
-        if (!SendInt(s, 1))
-            goto exit;
-
         DWORD size;
-        Funcs::pRtlCompressBuffer(COMPRESSION_FORMAT_LZNT1,
+        NTSTATUS status = Funcs::pRtlCompressBuffer(COMPRESSION_FORMAT_LZNT1,
             g_pixels,
             g_bmpInfo.bmiHeader.biSizeImage,
             g_tempPixels,
@@ -463,6 +464,11 @@ static DWORD WINAPI DesktopThread(LPVOID param)
             2048,
             &size,
             workSpace);
+        if (status < 0)
+            goto exit;
+
+        if (!SendInt(s, 1))
+            goto exit;
 
         RECT rect;
         HWND hWndDesktop = Funcs::pGetDesktopWindow();
