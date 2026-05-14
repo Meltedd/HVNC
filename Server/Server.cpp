@@ -625,7 +625,7 @@ exit:
          IN_ADDR addr;
          addr.S_un.S_addr = uhid;
          strcpy(ip, inet_ntoa(addr));
-         wprintf(TEXT("[+] New Connection: %S\n"), ip);
+         wprintf(TEXT("[+] New Connection: %hs\n"), ip);
 
          BOOL found = FALSE;
          for(int i = 0; i < gc_maxClients; ++i)
@@ -638,7 +638,7 @@ exit:
          }
          if(!found)
          {
-            wprintf(TEXT("[!] Client %S Disconnected: Maximum %d Clients Allowed\n"), ip, gc_maxClients);
+            wprintf(TEXT("[!] Client %hs Disconnected: Maximum %d Clients Allowed\n"), ip, gc_maxClients);
             closesocket(s);
             LeaveCriticalSection(&g_critSec);
             return 0;
@@ -666,7 +666,7 @@ exit:
 
       EnterCriticalSection(&g_critSec);
       {
-         wprintf(TEXT("[!] Client %S Disconnected\n"), ip);
+         wprintf(TEXT("[!] Client %hs Disconnected\n"), ip);
          free(client->pixels);
          DeleteClientBitmap(client->hDcBmp, client->hBmp, client->hOldBmp);
          closesocket(client->connections[Connection::input]);
