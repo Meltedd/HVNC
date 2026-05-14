@@ -168,9 +168,6 @@ static BOOL CALLBACK EnumHwndsPrint(HWND hWnd, LPARAM lParam)
 
     PaintWindow(hWnd, data->hDc, data->hDcScreen);
 
-    DWORD style = Funcs::pGetWindowLongA(hWnd, GWL_EXSTYLE);
-    Funcs::pSetWindowLongA(hWnd, GWL_EXSTYLE, style | WS_EX_COMPOSITED);
-
     OSVERSIONINFO versionInfo;
     versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
     Funcs::pGetVersionExA(&versionInfo);
