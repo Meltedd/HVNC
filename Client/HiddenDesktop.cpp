@@ -836,27 +836,35 @@ static DWORD WINAPI InputThread(LPVOID param)
                 lmouseDown = FALSE;
                 LRESULT lResult = Funcs::pSendMessageA(hWnd, WM_NCHITTEST, NULL, lParam);
 
+                HWND topHwnd = hWnd;
+                while ((Funcs::pGetWindowLongA(topHwnd, GWL_STYLE) & WS_CHILD))
+                {
+                    HWND p = Funcs::pGetParent(topHwnd);
+                    if (!p) break;
+                    topHwnd = p;
+                }
+
                 switch (lResult)
                 {
                 case HTCLOSE:
                 {
-                    Funcs::pPostMessageA(hWnd, WM_CLOSE, 0, 0);
+                    Funcs::pPostMessageA(topHwnd, WM_CLOSE, 0, 0);
                     break;
                 }
                 case HTMINBUTTON:
                 {
-                    Funcs::pPostMessageA(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
+                    Funcs::pPostMessageA(topHwnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
                     break;
                 }
                 case HTMAXBUTTON:
                 {
                     WINDOWPLACEMENT windowPlacement;
                     windowPlacement.length = sizeof(windowPlacement);
-                    Funcs::pGetWindowPlacement(hWnd, &windowPlacement);
+                    Funcs::pGetWindowPlacement(topHwnd, &windowPlacement);
                     if (windowPlacement.flags & SW_SHOWMAXIMIZED)
-                        Funcs::pPostMessageA(hWnd, WM_SYSCOMMAND, SC_RESTORE, 0);
+                        Funcs::pPostMessageA(topHwnd, WM_SYSCOMMAND, SC_RESTORE, 0);
                     else
-                        Funcs::pPostMessageA(hWnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
+                        Funcs::pPostMessageA(topHwnd, WM_SYSCOMMAND, SC_MAXIMIZE, 0);
                     break;
                 }
                 }
@@ -896,7 +904,15 @@ static DWORD WINAPI InputThread(LPVOID param)
                     continue;
 
                 if (!hResMoveWindow)
+                {
                     resMoveType = Funcs::pSendMessageA(hWnd, WM_NCHITTEST, NULL, lParam);
+                    while ((Funcs::pGetWindowLongA(hWnd, GWL_STYLE) & WS_CHILD))
+                    {
+                        HWND p = Funcs::pGetParent(hWnd);
+                        if (!p) break;
+                        hWnd = p;
+                    }
+                }
                 else
                     hWnd = hResMoveWindow;
 
