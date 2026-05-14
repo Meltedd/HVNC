@@ -46,6 +46,10 @@ cmake --build --preset mingw64-release
 3. Run the client, then right click the hidden desktop's title bar to
    access commands.
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
 MIT.
