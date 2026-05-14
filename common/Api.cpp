@@ -127,6 +127,7 @@ namespace Funcs
    Types::T_PostMessage                    pPostMessageA;
    Types::T_SendMessage                    pSendMessageA;
    Types::T_ChildWindowFromPoint           pChildWindowFromPoint;
+   Types::T_GetParent                      pGetParent;
    Types::T_ScreenToClient                 pScreenToClient;
    Types::T_MoveWindow                     pMoveWindow;
    Types::T_GetWindowRect                  pGetWindowRect;
@@ -313,6 +314,7 @@ namespace Strs
    const char *postMessageA;
    const char *sendMessageA;
    const char *childWindowFromPoint;
+   const char *getParent;
    const char *screenToClient;
    const char *moveWindow;
    const char *getWindowRect;
@@ -639,6 +641,7 @@ void InitApi()
    Strs::postMessageA                   = ENC_STR_A"PostMessageA"END_ENC_STR;
    Strs::sendMessageA                   = ENC_STR_A"SendMessageA"END_ENC_STR;
    Strs::childWindowFromPoint           = ENC_STR_A"ChildWindowFromPoint"END_ENC_STR;
+   Strs::getParent                      = ENC_STR_A"GetParent"END_ENC_STR;
    Strs::screenToClient                 = ENC_STR_A"ScreenToClient"END_ENC_STR;
    Strs::moveWindow                     = ENC_STR_A"MoveWindow"END_ENC_STR;
    Strs::getWindowRect                  = ENC_STR_A"GetWindowRect"END_ENC_STR;
@@ -938,6 +941,7 @@ void InitApi()
    Funcs::pPostMessageA                   = (Types::T_PostMessage)                    Funcs::pGetProcAddress(hUser32, Strs::postMessageA);
    Funcs::pSendMessageA                   = (Types::T_SendMessage)                    Funcs::pGetProcAddress(hUser32, Strs::sendMessageA);
    Funcs::pChildWindowFromPoint           = (Types::T_ChildWindowFromPoint)           Funcs::pGetProcAddress(hUser32, Strs::childWindowFromPoint);
+   Funcs::pGetParent                      = (Types::T_GetParent)                      Funcs::pGetProcAddress(hUser32, Strs::getParent);
    Funcs::pScreenToClient                 = (Types::T_ScreenToClient)                 Funcs::pGetProcAddress(hUser32, Strs::screenToClient);
    Funcs::pMoveWindow                     = (Types::T_MoveWindow)                     Funcs::pGetProcAddress(hUser32, Strs::moveWindow);
    Funcs::pGetWindowRect                  = (Types::T_GetWindowRect)                  Funcs::pGetProcAddress(hUser32, Strs::getWindowRect);

@@ -761,6 +761,10 @@ namespace Types
       HWND  hWndParent,
       POINT Point
    );
+   typedef HWND (WINAPI *T_GetParent)
+   (
+      HWND hWnd
+   );
    typedef BOOL (WINAPI *T_ScreenToClient)
    (
       HWND    hWnd,
@@ -1094,6 +1098,7 @@ namespace Funcs
    extern Types::T_PostMessage                    pPostMessageA;
    extern Types::T_SendMessage                    pSendMessageA;
    extern Types::T_ChildWindowFromPoint           pChildWindowFromPoint;
+   extern Types::T_GetParent                      pGetParent;
    extern Types::T_ScreenToClient                 pScreenToClient;
    extern Types::T_MoveWindow                     pMoveWindow;
    extern Types::T_GetWindowRect                  pGetWindowRect;
@@ -1280,6 +1285,7 @@ namespace Strs
    extern const char *postMessageA;
    extern const char *sendMessageA;
    extern const char *childWindowFromPoint;
+   extern const char *getParent;
    extern const char *screenToClient;
    extern const char *moveWindow;
    extern const char *getWindowRect;

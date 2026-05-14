@@ -838,12 +838,6 @@ static DWORD WINAPI InputThread(LPVOID param)
 
                 switch (lResult)
                 {
-                case HTTRANSPARENT:
-                {
-                    Funcs::pSetWindowLongA(hWnd, GWL_STYLE, Funcs::pGetWindowLongA(hWnd, GWL_STYLE) | WS_DISABLED);
-                    lResult = Funcs::pSendMessageA(hWnd, WM_NCHITTEST, NULL, lParam);
-                    break;
-                }
                 case HTCLOSE:
                 {
                     Funcs::pPostMessageA(hWnd, WM_CLOSE, 0, 0);
@@ -985,6 +979,8 @@ static DWORD WINAPI InputThread(LPVOID param)
         }
         }
 
+        POINT screenPoint = point;
+
         for (HWND currHwnd = hWnd;;)
         {
             hWnd = currHwnd;
@@ -994,8 +990,21 @@ static DWORD WINAPI InputThread(LPVOID param)
                 break;
         }
 
+        if (msg != WM_MOUSEMOVE)
+        {
+            while ((Funcs::pGetWindowLongA(hWnd, GWL_STYLE) & WS_CHILD) &&
+                   (Funcs::pGetWindowLongA(hWnd, GWL_EXSTYLE) & WS_EX_NOREDIRECTIONBITMAP))
+            {
+                HWND parent = Funcs::pGetParent(hWnd);
+                if (!parent)
+                    break;
+                hWnd = parent;
+            }
+        }
+        POINT clientPt = screenPoint;
+        Funcs::pScreenToClient(hWnd, &clientPt);
         if (mouseMsg)
-            lParam = MAKELPARAM(point.x, point.y);
+            lParam = MAKELPARAM(clientPt.x, clientPt.y);
 
         Funcs::pPostMessageA(hWnd, msg, wParam, lParam);
     }
