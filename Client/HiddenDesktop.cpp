@@ -273,9 +273,6 @@ static BOOL GetDeskPixels(int serverWidth, int serverHeight)
     g_bmpInfo.bmiHeader.biWidth = serverWidth;
     g_bmpInfo.bmiHeader.biHeight = serverHeight;
 
-    if (!Funcs::pBitBlt(hDcScreen, 0, 0, serverWidth, serverHeight, hDc, 0, 0, SRCCOPY))
-        goto cleanup;
-
     Funcs::pSelectObject(hDcScreen, hOldBmpScreen);
     hOldBmpScreen = NULL;
 
