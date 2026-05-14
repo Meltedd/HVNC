@@ -42,4 +42,9 @@ if(MSVC)
   target_compile_options(Client PRIVATE
     $<$<CONFIG:Release>:/O1 /Ob0 /Oi>
   )
+else()
+  # -O3 hangs InputThread on first char[N] = { 0 } aggregate init
+  target_compile_options(Client PRIVATE
+    $<$<CONFIG:Release>:-O1>
+  )
 endif()

