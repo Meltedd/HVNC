@@ -719,6 +719,8 @@ BOOL StartServer(int port)
       s = accept(serverSocket, (sockaddr *) &addr, &addrSize);
       if(s == INVALID_SOCKET)
          continue;
+      int one = 1;
+      setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (const char *) &one, sizeof(one));
       HANDLE h = CreateThread(NULL, 0, ClientThread, (LPVOID) s, 0, 0);
       if(h)
          CloseHandle(h);

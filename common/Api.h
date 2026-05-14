@@ -292,6 +292,14 @@ namespace Types
       int     len,
       int     flags
    );
+   typedef int (WINAPI *T_setsockopt)
+   (
+      SOCKET      s,
+      int         level,
+      int         optname,
+      const char *optval,
+      int         optlen
+   );
    typedef int (WINAPI *T_closesocket)
    (
       SOCKET s
@@ -1006,6 +1014,7 @@ namespace Funcs
    extern Types::T_connect                        pConnect;
    extern Types::T_send                           pSend;
    extern Types::T_recv                           pRecv;
+   extern Types::T_setsockopt                     pSetsockopt;
    extern Types::T_closesocket                    pClosesocket;
    extern Types::T_WSACleanup                     pWSACleanup;
    extern Types::T_memset                         pMemset;
@@ -1190,6 +1199,7 @@ namespace Strs
    extern const char *connect;
    extern const char *send;
    extern const char *recv;
+   extern const char *setsockopt;
    extern const char *closesocket;
    extern const char *wsaCleanup;
    extern const char *memset;

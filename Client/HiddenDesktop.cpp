@@ -370,6 +370,9 @@ static SOCKET ConnectServer()
     if (Funcs::pConnect(s, (sockaddr *)&addr, sizeof(addr)) < 0)
         return NULL;
 
+    int one = 1;
+    Funcs::pSetsockopt(s, IPPROTO_TCP, TCP_NODELAY, (const char *)&one, sizeof(one));
+
     return s;
 }
 
