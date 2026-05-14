@@ -120,7 +120,7 @@ static BOOL PaintWindow(HWND hWnd, HDC hDc, HDC hDcScreen)
     hOldBmpWindow = Funcs::pSelectObject(hDcWindow, hBmpWindow);
     if (!hOldBmpWindow)
         goto exit;
-    if (Funcs::pPrintWindow(hWnd, hDcWindow, 0))
+    if (Funcs::pPrintWindow(hWnd, hDcWindow, PW_RENDERFULLCONTENT))
     {
         Funcs::pBitBlt(hDcScreen,
             rect.left,
